@@ -1,14 +1,8 @@
 {
   "name": "ai-chatbot",
   "version": "1.0.0",
-  "description": "AI Chatbot with secure Node.js/Express backend",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
-  },
+  "description": "AI Chatbot with Vercel Serverless Functions",
   "dependencies": {
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2"
+    "dotenv": "^16.4.5"
   }
 }
