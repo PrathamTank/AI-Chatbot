@@ -62,12 +62,10 @@ const createMessageElement = (content, ...classes) => {
     return div;
 };
 
-// Dynamically point to the Express backend.
-// If the page is opened via Live Server (port 5500) or file://, direct requests to port 3000.
-const BACKEND_URL = window.location.origin.includes("localhost:3000") || window.location.origin.includes("127.0.0.1:3000") ? "" : "http://localhost:3000";
-const CHAT_API_URL = `${BACKEND_URL}/api/chat`;
 
 // Generate Bot Response (Direct Groq API)
+const CHAT_API_URL = "/api/chat";
+
 const generateBotResponse = async (incomingMessageDiv) => {
     const messageElement = incomingMessageDiv.querySelector(".message-text");
 
