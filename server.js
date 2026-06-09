@@ -32,7 +32,17 @@ app.use(express.json());
 
 // Serve ALL static frontend files (HTML, CSS, JS, videos, etc.) from this folder
 app.use(express.static(path.join(__dirname)));
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "index.html"));
+});
 
+app.get("/DocSum.html", (req, res) => {
+    res.sendFile(path.join(__dirname, "DocSum.html"));
+});
+
+app.get("/TextExtract.html", (req, res) => {
+    res.sendFile(path.join(__dirname, "TextExtract.html"));
+});
 // ─── POST /api/chat ───────────────────────────────────────────────────────────
 // Used by: script1.js (main chatbot on index.html)
 // Receives: { message: string }
@@ -133,9 +143,10 @@ app.post("/api/summarize", async (req, res) => {
 });
 
 // ─── Start server ─────────────────────────────────────────────────────────────
-app.listen(PORT, () => {
-    console.log(`✅  AI Chatbot server running at http://localhost:${PORT}`);
-    console.log(`   Main chatbot  → http://localhost:${PORT}/`);
-    console.log(`   Doc Summarizer→ http://localhost:${PORT}/DocSum.html`);
-    console.log(`   Text Extractor→ http://localhost:${PORT}/TextExtract.html`);
-});
+// app.listen(PORT, () => {
+//     console.log(`✅  AI Chatbot server running at http://localhost:${PORT}`);
+//     console.log(`   Main chatbot  → http://localhost:${PORT}/`);
+//     console.log(`   Doc Summarizer→ http://localhost:${PORT}/DocSum.html`);
+//     console.log(`   Text Extractor→ http://localhost:${PORT}/TextExtract.html`);
+// });
+module.exports = app;
