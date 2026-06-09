@@ -1,0 +1,290 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advanced Image Text Extractor</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f7fa;
+      color: #333;
+      line-height: 1.6;
+    }
+    h1 {
+      color: #2c3e50;
+      text-align: center;
+      margin-bottom: 30px;
+      font-weight: 600;
+    }
+    .container {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 25px;
+    }
+    .upload-area {
+      border: 2px dashed #3498db;
+      border-radius: 5px;
+      padding: 30px;
+      text-align: center;
+      margin-bottom: 20px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .upload-area:hover {
+      background-color: #f0f8ff;
+      border-color: #2980b9;
+    }
+    #imagePreview {
+      max-width: 100%;
+      max-height: 300px;
+      margin: 15px auto;
+      display: block;
+      border-radius: 4px;
+    }
+    #output {
+      margin-top: 20px;
+      white-space: pre-wrap;
+      background: #f8f9fa;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      min-height: 100px;
+      font-family: 'Courier New', monospace;
+      overflow-y: auto;
+      max-height: 300px;
+    }
+    .progress-container {
+      margin: 15px 0;
+      height: 6px;
+      background: #ecf0f1;
+      border-radius: 3px;
+      overflow: hidden;
+      display: none;
+    }
+    #progressBar {
+      height: 100%;
+      background: linear-gradient(90deg, #3498db, #2ecc71);
+      width: 0%;
+      transition: width 0.3s;
+    }
+    .btn {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s;
+      display: inline-block;
+    }
+    .btn:hover {
+      background-color: #2980b9;
+      transform: translateY(-1px);
+    }
+    .btn:active {
+      transform: translateY(0);
+    }
+    .language-selector {
+      margin: 15px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    select {
+      padding: 8px 12px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+      background-color: white;
+      font-family: inherit;
+      cursor: pointer;
+    }
+    .status {
+      font-style: italic;
+      color: #7f8c8d;
+      margin: 10px 0;
+      text-align: center;
+    }
+    .hidden {
+      display: none;
+    }
+    @media (max-width: 600px) {
+      body {
+        padding: 10px;
+      }
+      .container {
+        padding: 15px;
+      }
+      .upload-area {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Advanced Image Text Extractor</h1>
+    
+    <div class="upload-area" id="dropZone">
+      <p>Drag & drop an image here or click to browse</p>
+      <input type="file" id="imageInput" accept="image/*" style="display: none;" />
+      <button class="btn" onclick="document.getElementById('imageInput').click()">Select Image</button>
+    </div>
+    
+    <div class="language-selector">
+      <label for="language">Select Language: </label>
+      <select id="language">
+        <option value="eng">English</option>
+        <option value="spa">Spanish</option>
+        <option value="fra">French</option>
+        <option value="deu">German</option>
+        <option value="chi_sim">Chinese (Simplified)</option>
+        <option value="jpn">Japanese</option>
+        <option value="ara">Arabic</option>
+      </select>
+    </div>
+    
+    <div class="progress-container" id="progressContainer">
+      <div id="progressBar"></div>
+    </div>
+    
+    <p class="status" id="status">Ready to process images...</p>
+    
+    <img id="imagePreview" class="hidden" />
+    
+    <div id="output">Extracted text will appear here...</div>
+    
+    <button class="btn hidden" id="copyBtn" onclick="copyToClipboard()">Copy Text</button>
+  </div>
+
+  <!-- Use the latest stable version of Tesseract.js -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
+
+  <script>
+    // DOM Elements
+    const imageInput = document.getElementById('imageInput');
+    const outputDiv = document.getElementById('output');
+    const dropZone = document.getElementById('dropZone');
+    const imagePreview = document.getElementById('imagePreview');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressBar = document.getElementById('progressBar');
+    const statusText = document.getElementById('status');
+    const languageSelect = document.getElementById('language');
+    const copyBtn = document.getElementById('copyBtn');
+
+    // Event Listeners
+    imageInput.addEventListener('change', handleImageUpload);
+    
+    // Drag and drop handlers
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.style.backgroundColor = '#f0f8ff';
+      dropZone.style.borderColor = '#2980b9';
+    });
+    
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.style.backgroundColor = '';
+      dropZone.style.borderColor = '#3498db';
+    });
+    
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.style.backgroundColor = '';
+      dropZone.style.borderColor = '#3498db';
+      if (e.dataTransfer.files.length) {
+        imageInput.files = e.dataTransfer.files;
+        handleImageUpload({ target: imageInput });
+      }
+    });
+
+    // Main function to handle image processing
+    async function handleImageUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      // Validate file type
+      if (!file.type.match('image.*')) {
+        showError('Please upload an image file (JPEG, PNG, etc.)');
+        return;
+      }
+
+      // Show image preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        imagePreview.src = e.target.result;
+        imagePreview.classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+
+      // Reset UI state
+      outputDiv.textContent = 'Processing...';
+      progressContainer.style.display = 'block';
+      progressBar.style.width = '0%';
+      statusText.textContent = 'Initializing OCR engine...';
+      copyBtn.classList.add('hidden');
+
+      try {
+        // Initialize Tesseract worker
+        const worker = await Tesseract.createWorker({
+          logger: progress => {
+            if (progress.status === 'recognizing text') {
+              const percent = Math.round(progress.progress * 100);
+              progressBar.style.width = `${percent}%`;
+              statusText.textContent = `Processing: ${percent}%`;
+            }
+          }
+        });
+
+        // Load language and process image
+        const lang = languageSelect.value;
+        await worker.loadLanguage(lang);
+        await worker.initialize(lang);
+        
+        statusText.textContent = 'Recognizing text...';
+        const { data: { text } } = await worker.recognize(file);
+        
+        // Display results
+        outputDiv.textContent = text;
+        statusText.textContent = 'Text extraction complete!';
+        copyBtn.classList.remove('hidden');
+        
+        // Clean up worker
+        await worker.terminate();
+      } catch (error) {
+        console.error('OCR Error:', error);
+        showError(error.message || 'Failed to process image. Please try again.');
+      } finally {
+        progressContainer.style.display = 'none';
+      }
+    }
+
+    function showError(message) {
+      outputDiv.textContent = `Error: ${message}`;
+      statusText.textContent = 'Processing failed';
+      statusText.style.color = '#e74c3c';
+      setTimeout(() => {
+        statusText.style.color = '#7f8c8d';
+      }, 2000);
+    }
+
+    function copyToClipboard() {
+      const text = outputDiv.textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        statusText.textContent = 'Text copied to clipboard!';
+        setTimeout(() => {
+          statusText.textContent = 'Text extraction complete!';
+        }, 2000);
+      }).catch(err => {
+        console.error('Copy failed:', err);
+        statusText.textContent = 'Failed to copy text';
+      });
+    }
+  </script>
+</body>
+</html>
