@@ -646,3 +646,480 @@ body.show-chatbot .chatbot-popup {
 .EmojiMartPicker button {
     pointer-events: auto !important;
 }
+
+/* --- SPRINT 1: FULL SCREEN SIDEBAR LAYOUT STYLES --- */
+
+/* Reset body displays */
+body {
+    display: block;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    background: #000;
+}
+
+.app {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    z-index: 2;
+    overflow: hidden;
+}
+
+/* Sidebar Styling */
+.sidebar {
+    width: 260px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: rgba(13, 9, 39, 0.45); /* Dark translucent background */
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 24px 16px;
+    color: #fff;
+    flex-shrink: 0;
+    z-index: 10;
+    transition: width 0.3s ease, transform 0.3s ease;
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+.sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sidebar-logo .chatbot-logo {
+    width: 32px;
+    height: 32px;
+    background: #fff;
+    fill: #5350C4;
+    border-radius: 50%;
+    padding: 5px;
+}
+
+.sidebar-logo .app-name {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: 0.3px;
+}
+
+/* Buttons */
+.new-chat-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+    margin-bottom: 20px;
+    flex-shrink: 0;
+}
+
+.new-chat-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+.new-chat-btn span.material-symbols-rounded {
+    font-size: 1.25rem;
+}
+
+/* Labels */
+.sidebar-section-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.35);
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    margin-top: 8px;
+    padding-left: 8px;
+    flex-shrink: 0;
+}
+
+/* Chat History List */
+.chat-history {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 20px;
+    padding-right: 4px;
+}
+
+.chat-history::-webkit-scrollbar {
+    width: 4px;
+}
+
+.chat-history::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+}
+
+.chat-history-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.88rem;
+    color: rgba(255, 255, 255, 0.75);
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.chat-history-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+}
+
+.chat-history-item.active {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    font-weight: 500;
+}
+
+.chat-history-item span.material-symbols-rounded {
+    font-size: 1.15rem;
+}
+
+.chat-history-item .history-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Sidebar Tools Section */
+.sidebar-tools {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 20px;
+    flex-shrink: 0;
+}
+
+.sidebar-tool-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 0.88rem;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.sidebar-tool-link:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+}
+
+.sidebar-tool-link span.material-symbols-rounded {
+    font-size: 1.15rem;
+}
+
+/* Settings Button */
+.settings-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 12px 12px;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+    margin-top: auto;
+    flex-shrink: 0;
+    text-align: left;
+}
+
+.settings-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+}
+
+.settings-btn span.material-symbols-rounded {
+    font-size: 1.25rem;
+}
+
+/* Main Content Panel */
+.main-content {
+    flex: 1;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+/* OVERRIDES FOR POPUP CHATBOT */
+.main-content .chatbot-popup {
+    position: relative !important;
+    right: auto !important;
+    left: auto !important;
+    bottom: auto !important;
+    width: 100% !important;
+    height: 100% !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: scale(1) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    transition: none !important;
+    background: rgba(255, 255, 255, 0.88) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.main-content .chat-header {
+    background: rgba(83, 80, 196, 0.95) !important;
+    padding: 18px 24px !important;
+    flex-shrink: 0 !important;
+    border-radius: 0 !important;
+}
+
+.main-content .chat-body {
+    flex: 1 !important;
+    height: auto !important;
+    margin-bottom: 0 !important;
+    padding: 24px !important;
+    background: transparent !important;
+    overflow-y: auto !important;
+}
+
+.main-content .chat-footer {
+    position: relative !important;
+    bottom: auto !important;
+    width: 100% !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    padding: 16px 24px 24px !important;
+    border-top: 1px solid #ECECF1 !important;
+    flex-shrink: 0 !important;
+}
+
+.main-content .chat-footer .chat-form {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* RESPONSIVE DESIGN */
+
+/* Tablet View */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 220px;
+    }
+}
+
+/* Mobile View */
+@media (max-width: 520px) {
+    .sidebar {
+        display: none !important; /* Collapsed sidebar layout */
+    }
+    
+    .hamburger-menu {
+        display: block !important;
+    }
+    
+    .main-content {
+        width: 100%;
+        height: 100%;
+    }
+    
+    .main-content .chat-header {
+        padding: 14px 16px !important;
+    }
+    
+    .main-content .chat-body {
+        padding: 16px !important;
+    }
+    
+    .main-content .chat-footer {
+        padding: 12px 16px 16px !important;
+    }
+}
+
+/* ============================================================
+   SPRINT 2: UI POLISH — Premium ChatGPT / Claude feel
+   (Pure CSS overrides, no JS or feature changes)
+   ============================================================ */
+
+/* ── 1. Reduce Header Height (~35%) ── */
+.main-content .chat-header {
+    padding: 10px 24px !important;
+}
+
+/* ── 2 & 3. Constrain conversation + input to 850 px centered ── */
+.main-content .chat-body {
+    padding: 32px 24px 16px !important; /* 10 – breathing room top */
+    align-items: center !important;     /* centre flex children    */
+    gap: 28px !important;               /* 4 – more message spacing */
+}
+
+/* Every direct child (message rows) gets the same constrained width */
+.main-content .chat-body > * {
+    width: 100%;
+    max-width: 850px;
+}
+
+/* Input form matches conversation width exactly */
+.main-content .chat-footer .chat-form {
+    max-width: 850px !important;
+}
+
+/* ── 11. Better chat bubbles (slightly bigger radius + padding) ── */
+.chat-body .message .message-text {
+    padding: 14px 18px;
+    line-height: 1.68;
+    font-size: 0.95rem;
+}
+
+.chat-body .bot-message .message-text {
+    border-radius: 18px 18px 18px 5px;
+}
+
+.chat-body .user-message .message-text {
+    border-radius: 18px 18px 5px 18px;
+}
+
+/* Keep thinking state compact */
+.chat-body .bot-message.thinking .message-text {
+    padding: 2px 16px;
+}
+
+/* ── 8. Sidebar improvements ── */
+.sidebar {
+    padding: 28px 18px;
+}
+
+/* Active item: left accent border + stronger background */
+.chat-history-item {
+    border-left: 3px solid transparent;
+    padding-left: 9px; /* compensate so text stays aligned */
+}
+
+.chat-history-item.active {
+    background: rgba(83, 80, 196, 0.22) !important;
+    border-left-color: #7B78D8;
+    font-weight: 600;
+}
+
+/* Slide-in hover on history items */
+.chat-history-item:hover {
+    transform: translateX(3px);
+    background: rgba(255, 255, 255, 0.07) !important;
+}
+
+.sidebar-tool-link {
+    border-left: 3px solid transparent;
+    padding-left: 9px;
+}
+
+.sidebar-tool-link:hover {
+    transform: translateX(3px);
+}
+
+/* ── 9. New Chat button — padding, scale on hover ── */
+.new-chat-btn {
+    padding: 13px 18px !important;
+    border-radius: 10px !important;
+}
+
+.new-chat-btn:hover {
+    transform: scale(1.025);
+}
+
+/* ── 13. Global smooth transitions (0.2 – 0.25 s) ── */
+.new-chat-btn,
+.settings-btn,
+.chat-history-item,
+.sidebar-tool-link {
+    transition: background 0.25s ease,
+                color 0.25s ease,
+                transform 0.2s ease,
+                border-color 0.2s ease !important;
+}
+
+.chat-form .chat-controls button {
+    transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+
+.chat-form .chat-controls button:hover {
+    transform: scale(1.12);
+    background: #f1f1ff;
+}
+
+/* Keep send button scale consistent */
+.chat-form .chat-controls #send-message:hover {
+    background: #3d39ac;
+    transform: scale(1.12);
+}
+
+/* ── Responsive width constraints ── */
+@media (max-width: 768px) {
+    .main-content .chat-body > * {
+        max-width: 92%;
+    }
+}
+
+@media (max-width: 520px) {
+    .main-content .chat-body {
+        padding: 20px 14px 12px !important;
+    }
+
+    .main-content .chat-body > * {
+        max-width: 100%;
+    }
+}
+
+/* Delete chat button in sidebar */
+.chat-history-item .delete-chat-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    padding: 2px;
+    margin-left: auto;
+    border-radius: 4px;
+    transition: color 0.2s ease, background 0.2s ease;
+}
+
+.chat-history-item:hover .delete-chat-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chat-history-item .delete-chat-btn:hover {
+    color: #ff4d4d;
+    background: rgba(255, 77, 77, 0.15);
+}
+
+.chat-history-item .delete-chat-btn span {
+    font-size: 1rem;
+}

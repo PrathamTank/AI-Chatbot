@@ -67,10 +67,10 @@ AI CHATBOT/
 4. **Run the application**
    - For local development:
      ```bash
-     npx http-server
+     npm start
      ```
-   - Open `http://localhost:8080` in your browser
-   - Or simply open `index.html` directly in your browser
+   - Open `http://localhost:3000` in your browser.
+     This local development server correctly executes serverless functions under `api/` and serves the frontend assets together.
 
 ### Deployment (Vercel)
 

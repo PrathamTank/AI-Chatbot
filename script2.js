@@ -50,8 +50,16 @@ const generateBotResponse = async (incomingMessageDiv) => {
             body: JSON.stringify({ prompt })
         });
 
+        if (!response.ok) {
+            let errMsg = `Server error: ${response.status} ${response.statusText}`;
+            try {
+                const errData = await response.json();
+                if (errData && errData.error) errMsg = errData.error;
+            } catch (_) {}
+            throw new Error(errMsg);
+        }
+
         const data = await response.json();
-        if (!response.ok) throw new Error(data.error || "API error");
 
         // Backend returns { reply: "..." }
         const apiResponseText = data.reply;
@@ -59,7 +67,11 @@ const generateBotResponse = async (incomingMessageDiv) => {
 
     } catch (error) {
         console.log(error);
-        messageElement.innerText = "Error getting response.";
+        if (error.message.includes("405") || error.message.includes("Method Not Allowed")) {
+            messageElement.innerHTML = "Error: 405 (Method Not Allowed)<br><br>Please start the backend server by running <code>npm start</code> in your terminal, and open <strong>http://localhost:3000</strong> in your browser instead of using Live Server (port 5500) or opening the file directly.";
+        } else {
+            messageElement.innerText = `Error: ${error.message}`;
+        }
         messageElement.style.color = "#ff0000";
 
     } finally {

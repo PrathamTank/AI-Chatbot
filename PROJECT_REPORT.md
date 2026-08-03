@@ -285,20 +285,20 @@ echo "GROQ_API_KEY=your_key_here" > .env
 
 ### 6.3 Local Development
 
-**Option 1: Using http-server**
+**Option 1: Using the Unified Express Dev Server (Recommended)**
 ```bash
-npm install -g http-server
-http-server
-# Access at http://localhost:8080
+# Run the local server which serves static assets and executes API endpoints
+npm start
+# Access at http://localhost:3000
 ```
 
-**Option 2: Direct browser access**
-- Open `index.html` directly in browser
-- Note: Some features may be restricted due to CORS/security
-
-**Option 3: Using Node.js server**
+**Option 2: Using Vercel CLI (For Serverless Simulation)**
 ```bash
-node -e "require('http').createServer((q,s)=>require('fs').createReadStream('index.html').pipe(s)).listen(8000)"
+# Install Vercel CLI globally
+npm install -g vercel
+
+# Start local serverless development environment
+vercel dev
 ```
 
 ### 6.4 Production Deployment (Vercel)

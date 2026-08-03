@@ -15,6 +15,10 @@ const userData = {
     }
 };
 
+// Global Chat Manager state
+let currentChatId = null;
+let currentChatTitle = "New Chat";
+
 const initialInputHeight = messageInput.scrollHeight;
 
 // Check for speech synthesis support
@@ -63,68 +67,88 @@ const createMessageElement = (content, ...classes) => {
 };
 
 
-// Generate Bot Response (Direct Groq API)
+// Generate Bot Response
 const CHAT_API_URL = "/api/chat";
 
-const generateBotResponse = async (incomingMessageDiv) => {
+// Markdown & HTML Helper Functions
+const escapeHtml = (s) => s ? s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;') : '';
+
+const renderMarkdown = (raw) => {
+    if (!raw) return '';
+    let t = escapeHtml(raw);
+    // Code blocks ```...```
+    t = t.replace(/```([\s\S]*?)```/g, (m, code) => `<pre><code>${code.replace(/</g,'&lt;')}</code></pre>`);
+    // Inline code `...`
+    t = t.replace(/`([^`]+?)`/g, (m, code) => `<code>${code}</code>`);
+    // Bold + italic ***text***
+    t = t.replace(/\*\*\*([\s\S]+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+    // Bold **text** or __text__
+    t = t.replace(/(\*\*|__)([\s\S]+?)\1/g, '<strong>$2</strong>');
+    // Italic *text* or _text_
+    t = t.replace(/(\*|_)([^\*_\n][\s\S]*?)\1/g, '<em>$2</em>');
+    // Strikethrough ~~text~~
+    t = t.replace(/~~([\s\S]+?)~~/g, '<s>$1</s>');
+    // Links [text](url)
+    t = t.replace(/\[([^\]]+?)\]\(([^\)]+?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+    // Replace remaining line breaks with <br>
+    t = t.replace(/\n/g, '<br>');
+    return t;
+};
+
+const stripMarkdown = (raw) => {
+    if (!raw) return '';
+    return raw
+        .replace(/```[\s\S]*?```/g, '')
+        .replace(/`([^`]+?)`/g, '$1')
+        .replace(/\*\*\*([\s\S]+?)\*\*\*/g, '$1')
+        .replace(/(\*\*|__)([\s\S]+?)\1/g, '$2')
+        .replace(/(\*|_)([^\*_\n][\s\S]*?)\1/g, '$2')
+        .replace(/~~([\s\S]+?)~~/g, '$1')
+        .replace(/\[([^\]]+?)\]\(([^\)]+?)\)/g, '$1')
+        .replace(/\n/g, ' ')
+        .trim();
+};
+
+const generateBotResponse = async (incomingMessageDiv, userMessageText) => {
     const messageElement = incomingMessageDiv.querySelector(".message-text");
 
+    // Ensure we have a active chatId
+    if (!currentChatId) {
+        try {
+            const createRes = await fetch("/api/create-chat", { method: "POST" });
+            if (createRes.ok) {
+                const createData = await createRes.json();
+                currentChatId = createData.chatId;
+                currentChatTitle = createData.title || "New Chat";
+            }
+        } catch (e) {
+            console.error("Failed to auto-create chat ID:", e);
+        }
+    }
+
     try {
-        // Send only the user message to our backend — no API key in this request
         const response = await fetch(CHAT_API_URL, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                message: userData.message
+                chatId: currentChatId,
+                message: userMessageText || userData.message
             })
         });
 
+        if (!response.ok) {
+            let errMsg = `Server error: ${response.status} ${response.statusText}`;
+            try {
+                const errData = await response.json();
+                if (errData && errData.error) errMsg = errData.error;
+            } catch (_) {}
+            throw new Error(errMsg);
+        }
+
         const data = await response.json();
-        if (!response.ok) throw new Error(data.error || "API error");
-
-        // Backend returns { reply: "..." }
         const apiResponseText = data.reply;
-
-        // Render markdown-like formatting (basic): code blocks, inline code, bold, italic, links, strike
-        const escapeHtml = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-
-        const renderMarkdown = (raw) => {
-            if (!raw) return '';
-            let t = escapeHtml(raw);
-            // Code blocks ```...```
-            t = t.replace(/```([\s\S]*?)```/g, (m, code) => `<pre><code>${code.replace(/</g,'&lt;')}</code></pre>`);
-            // Inline code `...`
-            t = t.replace(/`([^`]+?)`/g, (m, code) => `<code>${code}</code>`);
-            // Bold + italic ***text***
-            t = t.replace(/\*\*\*([\s\S]+?)\*\*\*/g, '<strong><em>$1</em></strong>');
-            // Bold **text** or __text__
-            t = t.replace(/(\*\*|__)([\s\S]+?)\1/g, '<strong>$2</strong>');
-            // Italic *text* or _text_
-            t = t.replace(/(\*|_)([^\*_\n][\s\S]*?)\1/g, '<em>$2</em>');
-            // Strikethrough ~~text~~
-            t = t.replace(/~~([\s\S]+?)~~/g, '<s>$1</s>');
-            // Links [text](url)
-            t = t.replace(/\[([^\]]+?)\]\(([^\)]+?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
-            // Replace remaining line breaks with <br>
-            t = t.replace(/\n/g, '<br>');
-            return t;
-        };
-
-        const stripMarkdown = (raw) => {
-            if (!raw) return '';
-            return raw
-                .replace(/```[\s\S]*?```/g, '')
-                .replace(/`([^`]+?)`/g, '$1')
-                .replace(/\*\*\*([\s\S]+?)\*\*\*/g, '$1')
-                .replace(/(\*\*|__)([\s\S]+?)\1/g, '$2')
-                .replace(/(\*|_)([^\*_\n][\s\S]*?)\1/g, '$2')
-                .replace(/~~([\s\S]+?)~~/g, '$1')
-                .replace(/\[([^\]]+?)\]\(([^\)]+?)\)/g, '$1')
-                .replace(/\n/g, ' ')
-                .trim();
-        };
 
         const rendered = renderMarkdown(apiResponseText);
         messageElement.innerHTML = rendered;
@@ -143,9 +167,28 @@ const generateBotResponse = async (incomingMessageDiv) => {
         };
         incomingMessageDiv.appendChild(voiceBtn);
 
+        // Auto-title: If title is "New Chat", rename based on first user message
+        if ((!currentChatTitle || currentChatTitle === "New Chat") && userMessageText) {
+            const cleanMsg = userMessageText.trim().replace(/\n/g, ' ');
+            const newTitle = cleanMsg.length > 35 ? cleanMsg.slice(0, 35) + "..." : cleanMsg;
+            currentChatTitle = newTitle;
+
+            fetch("/api/rename-chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ chatId: currentChatId, title: newTitle })
+            }).then(() => {
+                loadChatList();
+            }).catch(err => console.error("Error renaming chat:", err));
+        }
+
     } catch (error) {
         console.error(error);
-        messageElement.innerText = "Error getting response.";
+        if (error.message.includes("405") || error.message.includes("Method Not Allowed")) {
+            messageElement.innerHTML = "Error: 405 (Method Not Allowed)<br><br>Please start the backend server by running <code>npm start</code> in your terminal, and open <strong>http://localhost:3000</strong> in your browser instead of using Live Server (port 5500) or opening the file directly.";
+        } else {
+            messageElement.innerText = `Error: ${error.message}`;
+        }
         messageElement.style.color = "#ff0000";
     } finally {
         userData.file = {};
@@ -184,6 +227,8 @@ const handleOutgoingMessage = (e) => {
     userData.message = messageInput.value.trim();
     if (!userData.message) return;
 
+    const userMessageText = userData.message;
+
     messageInput.value = "";
     fileUploadWrapper.classList.remove("file-uploaded");
     messageInput.dispatchEvent(new Event("input"));
@@ -210,13 +255,22 @@ const handleOutgoingMessage = (e) => {
         const incomingMessageDiv = createMessageElement(messageContent, "bot-message", "thinking");
         chatBody.appendChild(incomingMessageDiv);
         chatBody.scrollTo({ top: chatBody.scrollHeight, behavior: "smooth" });
-        generateBotResponse(incomingMessageDiv);
+        generateBotResponse(incomingMessageDiv, userMessageText);
     }, 600);
 };
 
 // Event listeners
+const chatForm = document.querySelector(".chat-form");
+if (chatForm) {
+    chatForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        handleOutgoingMessage(e);
+    });
+}
+
 messageInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && !e.shiftKey && window.innerWidth > 768) {
+    if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
         handleOutgoingMessage(e);
     }
 });
@@ -226,7 +280,10 @@ messageInput.addEventListener("input", () => {
     messageInput.style.height = `${messageInput.scrollHeight}px`;
 });
 
-sendMessageButton.addEventListener("click", handleOutgoingMessage);
+sendMessageButton.addEventListener("click", (e) => {
+    e.preventDefault();
+    handleOutgoingMessage(e);
+});
 chatbotToggler.addEventListener("click", () => document.body.classList.toggle("show-chatbot"));
 closeChatbot.addEventListener("click", () => document.body.classList.remove("show-chatbot"));
 
@@ -535,3 +592,204 @@ document.addEventListener('click', (e) => {
 });
 
 // (Removed duplicate handlers above — consolidated behavior already defined)
+
+// --- SPRINT 3: CHAT MANAGER (REDIS CONVERSATION PERSISTENCE) ---
+const defaultWelcomeHTML = `
+    <div class="message bot-message">
+        <svg class="bot-avatar" xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 1024 1024">
+            <path d="M738.3 287.6H285.7c-59 0-106.8 47.8-106.8 106.8v303.1c0 59 47.8 106.8 106.8 106.8h81.5v111.1c0 .7.8 1.1 1.4.7l166.9-110.6 41.8-.8h117.4l43.6-.4c59 0 106.8-47.8 106.8-106.8V394.5c0-59-47.8-106.9-106.8-106.9zM351.7 448.2c0-29.5 23.9-53.5 53.5-53.5s53.5 23.9 53.5 53.5-23.9 53.5-53.5 53.5-53.5-23.9-53.5-53.5zm157.9 267.1c-67.8 0-123.8-47.5-132.3-109h264.6c-8.6 61.5-64.5 109-132.3 109zm110-213.7c-29.5 0-53.5-23.9-53.5-53.5s23.9-53.5 53.5-53.5 53.5 23.9 53.5 53.5-23.9 53.5-53.5 53.5zM867.2 644.5V453.1h26.5c19.4 0 35.1 15.7 35.1 35.1v121.1c0 19.4-15.7 35.1-35.1 35.1h-26.5zM95.2 609.4V488.2c0-19.4 15.7-35.1 35.1-35.1h26.5v191.3h-26.5c-19.4 0-35.1-15.7-35.1-35.1zM561.5 149.6c0 23.4-15.6 43.3-36.9 49.7v44.9h-30v-44.9c-21.4-6.5-36.9-26.3-36.9-49.7 0-28.6 23.3-51.9 51.9-51.9s51.9 23.3 51.9 51.9z"></path>
+        </svg>
+        <div class="message-text">Hey there 👋 <br /> How can I help you today?</div>
+        <button class="voice-btn" data-message="Hey there 👋 How can I help you today?">
+            <span class="material-symbols-rounded">volume_up</span>
+        </button>
+    </div>
+`;
+
+function resetChatWindow() {
+    chatBody.innerHTML = defaultWelcomeHTML;
+}
+
+// Fetch & render sidebar chat list
+async function loadChatList() {
+    try {
+        const res = await fetch("/api/get-chats");
+        if (!res.ok) return;
+        const chats = await res.json();
+        const historyContainer = document.querySelector(".chat-history");
+        if (!historyContainer) return;
+
+        historyContainer.innerHTML = "";
+
+        if (chats.length === 0) {
+            return;
+        }
+
+        chats.forEach(chat => {
+            const div = document.createElement("div");
+            div.className = `chat-history-item ${chat.id === currentChatId ? 'active' : ''}`;
+            div.setAttribute("data-id", chat.id);
+            div.innerHTML = `
+                <span class="material-symbols-rounded">chat_bubble</span>
+                <span class="history-text">${escapeHtml(chat.title || "New Chat")}</span>
+                <button class="delete-chat-btn" title="Delete chat">
+                    <span class="material-symbols-rounded">delete</span>
+                </button>
+            `;
+
+            div.addEventListener("click", (e) => {
+                if (e.target.closest(".delete-chat-btn")) {
+                    e.stopPropagation();
+                    deleteChat(chat.id);
+                } else {
+                    loadChat(chat.id);
+                }
+            });
+
+            historyContainer.appendChild(div);
+        });
+    } catch (err) {
+        console.error("Failed to load chat list:", err);
+    }
+}
+
+// Start a new chat
+async function startNewChat(autoSelect = true) {
+    try {
+        const res = await fetch("/api/create-chat", { method: "POST" });
+        if (!res.ok) throw new Error("Failed to create chat");
+        const data = await res.json();
+        currentChatId = data.chatId;
+        currentChatTitle = data.title || "New Chat";
+
+        resetChatWindow();
+
+        if (autoSelect) {
+            await loadChatList();
+        }
+    } catch (err) {
+        console.error("Error starting new chat:", err);
+    }
+}
+
+// Load a specific chat and render its messages
+async function loadChat(id) {
+    if (!id) return;
+    try {
+        const res = await fetch(`/api/get-chat?id=${id}`);
+        if (!res.ok) throw new Error("Failed to fetch chat");
+        const chat = await res.json();
+
+        currentChatId = chat.id;
+        currentChatTitle = chat.title || "New Chat";
+
+        // Highlight active chat item in sidebar
+        document.querySelectorAll(".chat-history-item").forEach(item => {
+            if (item.getAttribute("data-id") === id) {
+                item.classList.add("active");
+            } else {
+                item.classList.remove("active");
+            }
+        });
+
+        // Replay messages
+        chatBody.innerHTML = "";
+        if (!chat.messages || chat.messages.length === 0) {
+            resetChatWindow();
+            return;
+        }
+
+        chat.messages.forEach(m => {
+            if (m.role === "user") {
+                const userDiv = createMessageElement('<div class="message-text"></div>', "user-message");
+                userDiv.querySelector(".message-text").innerText = m.content;
+                chatBody.appendChild(userDiv);
+            } else if (m.role === "assistant") {
+                const botDiv = createMessageElement(`
+                    <svg class="bot-avatar" xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 1024 1024">
+                        <path d="M738.3 287.6H285.7c-59 0-106.8 47.8-106.8 106.8v303.1c0 59 47.8 106.8 106.8 106.8h81.5v111.1c0 .7.8 1.1 1.4.7l166.9-110.6 41.8-.8h117.4l43.6-.4c59 0 106.8-47.8 106.8-106.8V394.5c0-59-47.8-106.9-106.8-106.9zM351.7 448.2c0-29.5 23.9-53.5 53.5-53.5s53.5 23.9 53.5 53.5-23.9 53.5-53.5 53.5-53.5-23.9-53.5-53.5zm157.9 267.1c-67.8 0-123.8-47.5-132.3-109h264.6c-8.6 61.5-64.5 109-132.3 109zm110-213.7c-29.5 0-53.5-23.9-53.5-53.5s23.9-53.5 53.5-53.5 53.5 23.9 53.5 53.5-23.9 53.5-53.5 53.5zM867.2 644.5V453.1h26.5c19.4 0 35.1 15.7 35.1 35.1v121.1c0 19.4-15.7 35.1-35.1 35.1h-26.5zM95.2 609.4V488.2c0-19.4 15.7-35.1 35.1-35.1h26.5v191.3h-26.5c-19.4 0-35.1-15.7-35.1-35.1zM561.5 149.6c0 23.4-15.6 43.3-36.9 49.7v44.9h-30v-44.9c-21.4-6.5-36.9-26.3-36.9-49.7 0-28.6 23.3-51.9 51.9-51.9s51.9 23.3 51.9 51.9z"></path>
+                    </svg>
+                    <div class="message-text">${renderMarkdown(m.content)}</div>
+                `, "bot-message");
+
+                const voiceBtn = document.createElement('button');
+                voiceBtn.className = 'voice-btn';
+                voiceBtn.setAttribute('data-message', stripMarkdown(m.content));
+                voiceBtn.innerHTML = '<span class="material-symbols-rounded">volume_up</span>';
+                voiceBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    if (window.speechSynthesis.speaking) {
+                        window.speechSynthesis.cancel();
+                    } else {
+                        speakText(m.content);
+                    }
+                };
+                botDiv.appendChild(voiceBtn);
+                chatBody.appendChild(botDiv);
+            }
+        });
+
+        chatBody.scrollTo({ top: chatBody.scrollHeight, behavior: "smooth" });
+    } catch (err) {
+        console.error("Error loading chat:", err);
+    }
+}
+
+// Delete chat
+async function deleteChat(id) {
+    try {
+        const res = await fetch(`/api/delete-chat`, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ chatId: id })
+        });
+        if (!res.ok) throw new Error("Failed to delete chat");
+
+        const isDeletingActive = (currentChatId === id);
+        if (isDeletingActive) {
+            currentChatId = null;
+        }
+
+        const resChats = await fetch("/api/get-chats");
+        const remainingChats = await resChats.json();
+        if (remainingChats.length > 0) {
+            await loadChatList();
+            if (isDeletingActive) {
+                await loadChat(remainingChats[0].id);
+            }
+        } else {
+            await startNewChat(true);
+        }
+    } catch (err) {
+        console.error("Error deleting chat:", err);
+    }
+}
+
+// Set default body class & initialize Chat Manager
+document.body.classList.add("show-chatbot");
+
+const newChatBtn = document.querySelector(".new-chat-btn");
+if (newChatBtn) {
+    newChatBtn.addEventListener("click", () => {
+        startNewChat(true);
+    });
+}
+
+// Load chats on initial application load
+(async function initChatManager() {
+    try {
+        const res = await fetch("/api/get-chats");
+        if (res.ok) {
+            const chats = await res.json();
+            if (chats.length > 0) {
+                await loadChatList();
+                await loadChat(chats[0].id);
+                return;
+            }
+        }
+        await startNewChat(true);
+    } catch (err) {
+        console.error("Initialization error:", err);
+        await startNewChat(true);
+    }
+})();
