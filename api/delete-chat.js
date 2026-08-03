@@ -5,7 +5,8 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: "Method not allowed" });
     }
 
-    const chatId = req.body?.chatId || req.body?.id || req.query?.id || req.query?.chatId;
+    const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
+    const chatId = body.chatId || body.id || req.query?.id || req.query?.chatId;
     if (!chatId) {
         return res.status(400).json({ error: "Chat ID is required" });
     }
