@@ -1,4 +1,4 @@
-import redis from './redis.js';
+import redis from '../lib/redis.js';
 import auth from '../middleware/auth.js';
 
 export default async function handler(req, res) {

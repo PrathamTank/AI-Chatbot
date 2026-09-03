@@ -1,6 +1,6 @@
 import adminAuth from '../../middleware/adminAuth.js';
 import supabaseAdmin from '../../lib/supabaseAdmin.js';
-import redis from '../redis.js';
+import redis from '../../lib/redis.js';
 
 /**
  * GET /api/admin/users
