@@ -10,6 +10,14 @@
       "use": "@vercel/node"
     },
     {
+      "src": "lib/supabase.js",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "js/api.js",
+      "use": "@vercel/static"
+    },
+    {
       "src": "*",
       "use": "@vercel/static"
     }
