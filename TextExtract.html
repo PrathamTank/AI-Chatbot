@@ -1,169 +1,494 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Advanced Image Text Extractor</title>
+  <title>Text Extractor | AI Chatbot</title>
+  <!-- Linking Google fonts for Inter typography and Material Symbols -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,400,1,0" />
+  <link rel="stylesheet" href="theme.css">
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem("ai_chatbot_theme") || "light";
+        document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+    })();
+  </script>
   <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 20px;
-      background-color: #f5f7fa;
-      color: #333;
-      line-height: 1.6;
-    }
-    h1 {
-      color: #2c3e50;
-      text-align: center;
-      margin-bottom: 30px;
-      font-weight: 600;
-    }
-    .container {
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      padding: 25px;
-    }
-    .upload-area {
-      border: 2px dashed #3498db;
-      border-radius: 5px;
-      padding: 30px;
-      text-align: center;
-      margin-bottom: 20px;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    .upload-area:hover {
-      background-color: #f0f8ff;
-      border-color: #2980b9;
-    }
-    #imagePreview {
-      max-width: 100%;
-      max-height: 300px;
-      margin: 15px auto;
-      display: block;
-      border-radius: 4px;
-    }
-    #output {
-      margin-top: 20px;
-      white-space: pre-wrap;
-      background: #f8f9fa;
-      padding: 15px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      min-height: 100px;
-      font-family: 'Courier New', monospace;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+      min-height: 100vh;
+      min-height: 100dvh;
+      width: 100vw;
+      background: #000;
+      overflow-x: hidden;
       overflow-y: auto;
-      max-height: 300px;
+      padding: 20px;
     }
-    .progress-container {
-      margin: 15px 0;
-      height: 6px;
-      background: #ecf0f1;
-      border-radius: 3px;
-      overflow: hidden;
-      display: none;
-    }
-    #progressBar {
+
+    .background-video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
       height: 100%;
-      background: linear-gradient(90deg, #3498db, #2ecc71);
-      width: 0%;
-      transition: width 0.3s;
+      object-fit: cover;
+      z-index: -1;
     }
-    .btn {
-      background-color: #3498db;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 16px;
-      transition: all 0.3s;
-      display: inline-block;
+
+    /* Tool Container / Card matching Chatbot Panel */
+    .container {
+      width: 100%;
+      max-width: 880px;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 2;
+      animation: fadeIn 0.25s ease-out;
     }
-    .btn:hover {
-      background-color: #2980b9;
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Chatbot-style Header */
+    .tool-header {
+      background: rgba(83, 80, 196, 0.95);
+      padding: 14px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #fff;
+      flex-shrink: 0;
+      gap: 12px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .back-home-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 13px;
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 8px;
+      color: #fff;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: background 0.2s ease, transform 0.15s ease;
+      flex-shrink: 0;
+    }
+
+    .back-home-btn:hover {
+      background: rgba(255, 255, 255, 0.25);
       transform: translateY(-1px);
     }
-    .btn:active {
-      transform: translateY(0);
+
+    .back-home-btn span.material-symbols-rounded {
+      font-size: 1.1rem;
     }
-    .language-selector {
-      margin: 15px 0;
+
+    .header-divider {
+      width: 1px;
+      height: 22px;
+      background: rgba(255, 255, 255, 0.25);
+      flex-shrink: 0;
+    }
+
+    .header-info {
       display: flex;
       align-items: center;
       gap: 10px;
+      min-width: 0;
     }
-    select {
-      padding: 8px 12px;
-      border-radius: 4px;
-      border: 1px solid #ddd;
-      background-color: white;
-      font-family: inherit;
-      cursor: pointer;
+
+    .header-info .chatbot-logo {
+      height: 34px;
+      width: 34px;
+      padding: 5px;
+      fill: #5350C4;
+      flex-shrink: 0;
+      background: #fff;
+      border-radius: 50%;
     }
-    .status {
-      font-style: italic;
-      color: #7f8c8d;
-      margin: 10px 0;
+
+    .header-info .logo-text {
+      color: #fff;
+      font-size: 1.15rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tool-badge {
+      font-size: 0.72rem;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 3px 9px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      flex-shrink: 0;
+    }
+
+    /* Main Tool Content Area */
+    .tool-content {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    /* Upload Area */
+    .upload-area {
+      border: 2px dashed #5350C4;
+      border-radius: 12px;
+      padding: 32px 20px;
       text-align: center;
+      background: rgba(83, 80, 196, 0.03);
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
     }
-    .hidden {
+
+    .upload-area:hover {
+      background: rgba(83, 80, 196, 0.08);
+      border-color: #3d39ac;
+    }
+
+    .upload-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(83, 80, 196, 0.12);
+      color: #5350C4;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .upload-icon span {
+      font-size: 1.8rem;
+    }
+
+    .upload-area p {
+      color: #4a4a68;
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    /* Buttons */
+    .btn {
+      background-color: #5350C4;
+      color: #fff;
+      border: none;
+      padding: 10px 22px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.92rem;
+      font-weight: 500;
+      transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(83, 80, 196, 0.25);
+    }
+
+    .btn:hover {
+      background-color: #3d39ac;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(83, 80, 196, 0.35);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn span.material-symbols-rounded {
+      font-size: 1.15rem;
+    }
+
+    /* Language Selector Bar */
+    .controls-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 4px 0;
+    }
+
+    .language-selector {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.9rem;
+      color: #4a4a68;
+      font-weight: 500;
+    }
+
+    select {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1px solid #CCCCE5;
+      background-color: #fff;
+      font-size: 0.9rem;
+      color: #333;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    select:focus {
+      border-color: #5350C4;
+      box-shadow: 0 0 0 3px rgba(83, 80, 196, 0.15);
+    }
+
+    /* Progress Container */
+    .progress-container {
+      height: 6px;
+      background: #ECECF5;
+      border-radius: 4px;
+      overflow: hidden;
       display: none;
+      width: 100%;
     }
-    @media (max-width: 600px) {
+
+    #progressBar {
+      height: 100%;
+      background: linear-gradient(90deg, #5350C4, #7B78D8);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* Status text */
+    .status {
+      font-size: 0.88rem;
+      color: #6F6BC2;
+      text-align: center;
+      font-weight: 500;
+      min-height: 20px;
+    }
+
+    /* Image Preview */
+    #imagePreview {
+      max-width: 100%;
+      max-height: 260px;
+      margin: 4px auto;
+      display: block;
+      border-radius: 8px;
+      border: 1px solid #ECECF1;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+      object-fit: contain;
+    }
+
+    /* Extracted Text Output Box */
+    .output-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .output-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #4a4a68;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    #output {
+      white-space: pre-wrap;
+      background: #F8F8FC;
+      padding: 16px 18px;
+      border: 1px solid #E0E0EE;
+      border-radius: 10px;
+      min-height: 120px;
+      max-height: 280px;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.92rem;
+      color: #2c3e50;
+      line-height: 1.6;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #ccccf5 transparent;
+    }
+
+    #output::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    #output::-webkit-scrollbar-thumb {
+      background: #ccccf5;
+      border-radius: 3px;
+    }
+
+    .action-row {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
       body {
-        padding: 10px;
+        padding: 0;
       }
+
       .container {
-        padding: 15px;
+        border-radius: 0;
+        min-height: 100vh;
+        min-height: 100dvh;
+        box-shadow: none;
+        border: none;
       }
+
+      .tool-header {
+        padding: 12px 16px;
+      }
+
+      .logo-text {
+        font-size: 1rem;
+      }
+
+      .tool-badge {
+        display: none;
+      }
+
+      .tool-content {
+        padding: 18px 14px;
+      }
+
       .upload-area {
-        padding: 20px;
+        padding: 24px 14px;
       }
     }
   </style>
 </head>
 <body>
+
+  <!-- Fullscreen background video matching chatbot -->
+  <video class="background-video" autoplay muted loop>
+    <source src="bg.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+
   <div class="container">
-    <h1>Advanced Image Text Extractor</h1>
+    <!-- Chatbot-style Header -->
+    <header class="tool-header">
+      <div class="header-left">
+        <a href="/" class="back-home-btn" title="Return to Main Chatbot">
+          <span class="material-symbols-rounded">arrow_back</span>
+          <span>Back to Home</span>
+        </a>
+        <div class="header-divider"></div>
+        <div class="header-info">
+          <svg class="chatbot-logo" xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 1024 1024">
+            <path d="M738.3 287.6H285.7c-59 0-106.8 47.8-106.8 106.8v303.1c0 59 47.8 106.8 106.8 106.8h81.5v111.1c0 .7.8 1.1 1.4.7l166.9-110.6 41.8-.8h117.4l43.6-.4c59 0 106.8-47.8 106.8-106.8V394.5c0-59-47.8-106.9-106.8-106.9zM351.7 448.2c0-29.5 23.9-53.5 53.5-53.5s53.5 23.9 53.5 53.5-23.9 53.5-53.5 53.5-53.5-23.9-53.5-53.5zm157.9 267.1c-67.8 0-123.8-47.5-132.3-109h264.6c-8.6 61.5-64.5 109-132.3 109zm110-213.7c-29.5 0-53.5-23.9-53.5-53.5s23.9-53.5 53.5-53.5 53.5 23.9 53.5 53.5-23.9 53.5-53.5 53.5zM867.2 644.5V453.1h26.5c19.4 0 35.1 15.7 35.1 35.1v121.1c0 19.4-15.7 35.1-35.1 35.1h-26.5zM95.2 609.4V488.2c0-19.4 15.7-35.1 35.1-35.1h26.5v191.3h-26.5c-19.4 0-35.1-15.7-35.1-35.1zM561.5 149.6c0 23.4-15.6 43.3-36.9 49.7v44.9h-30v-44.9c-21.4-6.5-36.9-26.3-36.9-49.7 0-28.6 23.3-51.9 51.9-51.9s51.9 23.3 51.9 51.9z"></path>
+          </svg>
+          <h1 class="logo-text">Text Extractor</h1>
+        </div>
+      </div>
+      <div class="header-right">
+        <button type="button" class="theme-toggle-btn" id="themeToggleBtn" aria-label="Toggle theme" title="Toggle Theme">
+          <span class="material-symbols-rounded theme-icon-sun">light_mode</span>
+          <span class="material-symbols-rounded theme-icon-moon">dark_mode</span>
+          <span class="theme-toggle-text">Dark</span>
+        </button>
+        <span class="tool-badge">OCR Tool</span>
+      </div>
+    </header>
     
-    <div class="upload-area" id="dropZone">
-      <p>Drag & drop an image here or click to browse</p>
-      <input type="file" id="imageInput" accept="image/*" style="display: none;" />
-      <button class="btn" onclick="document.getElementById('imageInput').click()">Select Image</button>
+    <!-- Tool Body -->
+    <div class="tool-content">
+      <div class="upload-area" id="dropZone">
+        <div class="upload-icon">
+          <span class="material-symbols-rounded">cloud_upload</span>
+        </div>
+        <p>Drag & drop an image here or click to browse</p>
+        <input type="file" id="imageInput" accept="image/*" style="display: none;" />
+        <button type="button" class="btn" onclick="document.getElementById('imageInput').click()">
+          <span class="material-symbols-rounded">add_photo_alternate</span>
+          <span>Select Image</span>
+        </button>
+      </div>
+      
+      <div class="controls-row">
+        <div class="language-selector">
+          <label for="language">OCR Language:</label>
+          <select id="language">
+            <option value="eng">English</option>
+            <option value="spa">Spanish</option>
+            <option value="fra">French</option>
+            <option value="deu">German</option>
+            <option value="chi_sim">Chinese (Simplified)</option>
+            <option value="jpn">Japanese</option>
+            <option value="ara">Arabic</option>
+          </select>
+        </div>
+        <p class="status" id="status">Ready to process images...</p>
+      </div>
+      
+      <div class="progress-container" id="progressContainer">
+        <div id="progressBar"></div>
+      </div>
+      
+      <img id="imagePreview" class="hidden" alt="Uploaded Preview" />
+      
+      <div class="output-wrapper">
+        <div class="output-header">
+          <span>Extracted Text</span>
+        </div>
+        <div id="output">Extracted text will appear here...</div>
+        <div class="action-row">
+          <button type="button" class="btn hidden" id="copyBtn" onclick="copyToClipboard()">
+            <span class="material-symbols-rounded">content_copy</span>
+            <span>Copy Text</span>
+          </button>
+        </div>
+      </div>
     </div>
-    
-    <div class="language-selector">
-      <label for="language">Select Language: </label>
-      <select id="language">
-        <option value="eng">English</option>
-        <option value="spa">Spanish</option>
-        <option value="fra">French</option>
-        <option value="deu">German</option>
-        <option value="chi_sim">Chinese (Simplified)</option>
-        <option value="jpn">Japanese</option>
-        <option value="ara">Arabic</option>
-      </select>
-    </div>
-    
-    <div class="progress-container" id="progressContainer">
-      <div id="progressBar"></div>
-    </div>
-    
-    <p class="status" id="status">Ready to process images...</p>
-    
-    <img id="imagePreview" class="hidden" />
-    
-    <div id="output">Extracted text will appear here...</div>
-    
-    <button class="btn hidden" id="copyBtn" onclick="copyToClipboard()">Copy Text</button>
   </div>
 
-  <!-- Use the latest stable version of Tesseract.js -->
+  <!-- Use latest stable version of Tesseract.js -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
 
   <script>
@@ -184,24 +509,95 @@
     // Drag and drop handlers
     dropZone.addEventListener('dragover', (e) => {
       e.preventDefault();
-      dropZone.style.backgroundColor = '#f0f8ff';
-      dropZone.style.borderColor = '#2980b9';
+      dropZone.style.backgroundColor = 'rgba(83, 80, 196, 0.12)';
+      dropZone.style.borderColor = '#3d39ac';
     });
     
     dropZone.addEventListener('dragleave', () => {
       dropZone.style.backgroundColor = '';
-      dropZone.style.borderColor = '#3498db';
+      dropZone.style.borderColor = '#5350C4';
     });
     
     dropZone.addEventListener('drop', (e) => {
       e.preventDefault();
       dropZone.style.backgroundColor = '';
-      dropZone.style.borderColor = '#3498db';
+      dropZone.style.borderColor = '#5350C4';
       if (e.dataTransfer.files.length) {
         imageInput.files = e.dataTransfer.files;
         handleImageUpload({ target: imageInput });
       }
     });
+
+    // Client-side image preprocessing for optimal OCR accuracy
+    function preprocessImageForOcr(imgElement) {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      const origW = imgElement.naturalWidth || imgElement.width;
+      const origH = imgElement.naturalHeight || imgElement.height;
+
+      // 1. Intelligent scaling: scale up smaller images to improve character height
+      let scale = 1;
+      const minDimension = Math.min(origW, origH);
+      if (minDimension < 800) {
+        scale = Math.min(2.5, 1200 / minDimension);
+      } else if (minDimension < 1200) {
+        scale = 1.5;
+      }
+
+      canvas.width = Math.round(origW * scale);
+      canvas.height = Math.round(origH * scale);
+
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(imgElement, 0, 0, canvas.width, canvas.height);
+
+      // 2. Grayscale & Contrast Enhancement
+      try {
+        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const d = imgData.data;
+
+        // Sample min and max luminance to detect contrast range
+        let minLum = 255;
+        let maxLum = 0;
+        const step = Math.max(1, Math.floor(d.length / (4 * 10000))); // Fast sample
+        for (let i = 0; i < d.length; i += 4 * step) {
+          const lum = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+          if (lum < minLum) minLum = lum;
+          if (lum > maxLum) maxLum = lum;
+        }
+
+        const range = maxLum - minLum;
+        const shouldStretch = range > 25 && range < 230;
+
+        for (let i = 0; i < d.length; i += 4) {
+          // Standard ITU-R luminance
+          let gray = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+
+          // Gentle linear stretch
+          if (shouldStretch) {
+            gray = ((gray - minLum) / range) * 255;
+          }
+
+          // Gentle S-curve contrast boost without destroying colors
+          if (gray > 128) {
+            gray = Math.min(255, gray + (gray - 128) * 0.25);
+          } else {
+            gray = Math.max(0, gray - (128 - gray) * 0.25);
+          }
+
+          d[i] = gray;
+          d[i + 1] = gray;
+          d[i + 2] = gray;
+        }
+
+        ctx.putImageData(imgData, 0, 0);
+      } catch (err) {
+        console.warn("Canvas pixel processing warning:", err);
+      }
+
+      return canvas;
+    }
 
     // Main function to handle image processing
     async function handleImageUpload(event) {
@@ -210,50 +606,71 @@
 
       // Validate file type
       if (!file.type.match('image.*')) {
-        showError('Please upload an image file (JPEG, PNG, etc.)');
+        showError('Please upload a valid image file (JPEG, PNG, WebP, etc.)');
         return;
       }
 
-      // Show image preview
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        imagePreview.src = e.target.result;
-        imagePreview.classList.remove('hidden');
-      };
-      reader.readAsDataURL(file);
-
       // Reset UI state
-      outputDiv.textContent = 'Processing...';
+      outputDiv.textContent = 'Processing image...';
       progressContainer.style.display = 'block';
       progressBar.style.width = '0%';
-      statusText.textContent = 'Initializing OCR engine...';
+      statusText.textContent = 'Loading and preprocessing image...';
       copyBtn.classList.add('hidden');
 
+      // Show original image preview (original preview is never altered)
+      const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+      imagePreview.src = dataUrl;
+      imagePreview.classList.remove('hidden');
+
+      // Wait for image dimensions to be available for preprocessing
+      await new Promise((resolve) => {
+        if (imagePreview.complete && imagePreview.naturalWidth) {
+          resolve();
+        } else {
+          imagePreview.onload = () => resolve();
+        }
+      });
+
       try {
+        statusText.textContent = 'Enhancing image for text recognition...';
+        // Produce preprocessed canvas for Tesseract OCR
+        const processedCanvas = preprocessImageForOcr(imagePreview);
+
+        statusText.textContent = 'Initializing OCR engine...';
         // Initialize Tesseract worker
         const worker = await Tesseract.createWorker({
           logger: progress => {
             if (progress.status === 'recognizing text') {
-              const percent = Math.round(progress.progress * 100);
+              const percent = Math.round((progress.progress || 0) * 100);
               progressBar.style.width = `${percent}%`;
-              statusText.textContent = `Processing: ${percent}%`;
+              statusText.textContent = `Recognizing text: ${percent}%`;
             }
           }
         });
 
-        // Load language and process image
-        const lang = languageSelect.value;
+        // Load language and initialize
+        const lang = languageSelect.value || 'eng';
         await worker.loadLanguage(lang);
         await worker.initialize(lang);
-        
-        statusText.textContent = 'Recognizing text...';
-        const { data: { text } } = await worker.recognize(file);
-        
+
+        statusText.textContent = 'Extracting text...';
+        // Recognize the preprocessed canvas
+        const { data: { text } } = await worker.recognize(processedCanvas);
+
         // Display results
-        outputDiv.textContent = text;
-        statusText.textContent = 'Text extraction complete!';
-        copyBtn.classList.remove('hidden');
-        
+        const cleanedText = text ? text.trim() : '';
+        outputDiv.textContent = cleanedText || 'No text recognized in this image.';
+        statusText.textContent = cleanedText ? 'Text extraction complete!' : 'No readable text found.';
+        if (cleanedText) {
+          copyBtn.classList.remove('hidden');
+        }
+
         // Clean up worker
         await worker.terminate();
       } catch (error) {
@@ -269,7 +686,7 @@
       statusText.textContent = 'Processing failed';
       statusText.style.color = '#e74c3c';
       setTimeout(() => {
-        statusText.style.color = '#7f8c8d';
+        statusText.style.color = '#6F6BC2';
       }, 2000);
     }
 
@@ -286,5 +703,6 @@
       });
     }
   </script>
+  <script src="theme.js"></script>
 </body>
 </html>

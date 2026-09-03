@@ -4,79 +4,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI CHATBOT | Pratham Tank</title>
+    <title>Document Summarizer | AI Chatbot</title>
     <link rel="stylesheet" href="style2.css">
-    <!-- Linking Google fonts fpr icons -->
+    <link rel="stylesheet" href="theme.css">
+    <script>
+        (function() {
+            try {
+                var t = localStorage.getItem("ai_chatbot_theme") || "light";
+                document.documentElement.setAttribute("data-theme", t);
+            } catch (e) {}
+        })();
+    </script>
+    <!-- Linking Google fonts for typography and icons -->
     <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,400,1,0" />
+        href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,400,1,0" />
 </head>
 
 <body>
 
     <video class="background-video" autoplay muted loop>
-        <source src="bg2.mp4" type="video/mp4"> <!-- Using .mp4 format here -->
+        <source src="bg2.mp4" type="video/mp4">
         Your browser does not support the video tag.
     </video>
 
-    <button id="chatbot-toggler">
+    <!-- Kept in DOM for script2.js event listener compatibility -->
+    <button id="chatbot-toggler" style="display: none;">
         <span class="material-symbols-rounded">mode_comment</span>
         <span class="material-symbols-rounded">close</span>
     </button>
 
-    <div class="chatbot-popup">
-        <!-- Chatbot header -->
-        <div class="chat-header">
-            <div class="header-info">
-                <svg class="chatbot-logo" xmlns="http://www.w3.org/2000/svg" width="50" height="50"
-                    viewBox="0 0 1024 1024">
-                    <path
-                        d="M738.3 287.6H285.7c-59 0-106.8 47.8-106.8 106.8v303.1c0 59 47.8 106.8 106.8 106.8h81.5v111.1c0 .7.8 1.1 1.4.7l166.9-110.6 41.8-.8h117.4l43.6-.4c59 0 106.8-47.8 106.8-106.8V394.5c0-59-47.8-106.9-106.8-106.9zM351.7 448.2c0-29.5 23.9-53.5 53.5-53.5s53.5 23.9 53.5 53.5-23.9 53.5-53.5 53.5-53.5-23.9-53.5-53.5zm157.9 267.1c-67.8 0-123.8-47.5-132.3-109h264.6c-8.6 61.5-64.5 109-132.3 109zm110-213.7c-29.5 0-53.5-23.9-53.5-53.5s23.9-53.5 53.5-53.5 53.5 23.9 53.5 53.5-23.9 53.5-53.5 53.5zM867.2 644.5V453.1h26.5c19.4 0 35.1 15.7 35.1 35.1v121.1c0 19.4-15.7 35.1-35.1 35.1h-26.5zM95.2 609.4V488.2c0-19.4 15.7-35.1 35.1-35.1h26.5v191.3h-26.5c-19.4 0-35.1-15.7-35.1-35.1zM561.5 149.6c0 23.4-15.6 43.3-36.9 49.7v44.9h-30v-44.9c-21.4-6.5-36.9-26.3-36.9-49.7 0-28.6 23.3-51.9 51.9-51.9s51.9 23.3 51.9 51.9z">
-                    </path>
-                </svg>
-                <h2 class="logo-text">Chatbot</h2>
-            </div>
-            <button id="close-chatbot" class="material-symbols-rounded">keyboard_arrow_down</button>
-        </div>
-
-        <!-- Chatbot Body -->
-        <div class="chat-body">
-            <div class="message bot-message">
-                <svg class="bot-avatar" xmlns="http://www.w3.org/2000/svg" width="50" height="50"
-                    viewBox="0 0 1024 1024">
-                    <path
-                        d="M738.3 287.6H285.7c-59 0-106.8 47.8-106.8 106.8v303.1c0 59 47.8 106.8 106.8 106.8h81.5v111.1c0 .7.8 1.1 1.4.7l166.9-110.6 41.8-.8h117.4l43.6-.4c59 0 106.8-47.8 106.8-106.8V394.5c0-59-47.8-106.9-106.8-106.9zM351.7 448.2c0-29.5 23.9-53.5 53.5-53.5s53.5 23.9 53.5 53.5-23.9 53.5-53.5 53.5-53.5-23.9-53.5-53.5zm157.9 267.1c-67.8 0-123.8-47.5-132.3-109h264.6c-8.6 61.5-64.5 109-132.3 109zm110-213.7c-29.5 0-53.5-23.9-53.5-53.5s23.9-53.5 53.5-53.5 53.5 23.9 53.5 53.5-23.9 53.5-53.5 53.5zM867.2 644.5V453.1h26.5c19.4 0 35.1 15.7 35.1 35.1v121.1c0 19.4-15.7 35.1-35.1 35.1h-26.5zM95.2 609.4V488.2c0-19.4 15.7-35.1 35.1-35.1h26.5v191.3h-26.5c-19.4 0-35.1-15.7-35.1-35.1zM561.5 149.6c0 23.4-15.6 43.3-36.9 49.7v44.9h-30v-44.9c-21.4-6.5-36.9-26.3-36.9-49.7 0-28.6 23.3-51.9 51.9-51.9s51.9 23.3 51.9 51.9z">
-                    </path>
-                </svg>
-                <div class="message-text">Hey there 👋 <br /> How can I help you today?</div>
-            </div>
-        </div>
-
-        <!-- Chatbot Footer -->
-        <div class="chat-footer">
-            <form action="#" class="chat-form">
-                <textarea class="message-input" disabled>Summarize this document</textarea>
-                <div class="chat-controls">
-                    <div class="file-upload-wrapper">
-                        <input type="file" accept=".txt,.pdf,.doc,.docx" id="file-input" hidden>
-                        <img src="#">
-                        <button type="button" id="file-upload" class="material-symbols-rounded">attach_file</button>
-                        <button type="button" id="file-cancel" class="material-symbols-rounded">close</button>
+    <div class="tool-container">
+        <div class="chatbot-popup">
+            <!-- Chatbot header -->
+            <div class="chat-header">
+                <div class="header-left">
+                    <a href="/" class="back-home-btn" title="Return to Main Chatbot">
+                        <span class="material-symbols-rounded">arrow_back</span>
+                        <span>Back to Home</span>
+                    </a>
+                    <div class="header-divider"></div>
+                    <div class="header-info">
+                        <svg class="chatbot-logo" xmlns="http://www.w3.org/2000/svg" width="50" height="50"
+                            viewBox="0 0 1024 1024">
+                            <path
+                                d="M738.3 287.6H285.7c-59 0-106.8 47.8-106.8 106.8v303.1c0 59 47.8 106.8 106.8 106.8h81.5v111.1c0 .7.8 1.1 1.4.7l166.9-110.6 41.8-.8h117.4l43.6-.4c59 0 106.8-47.8 106.8-106.8V394.5c0-59-47.8-106.9-106.8-106.9zM351.7 448.2c0-29.5 23.9-53.5 53.5-53.5s53.5 23.9 53.5 53.5-23.9 53.5-53.5 53.5-53.5-23.9-53.5-53.5zm157.9 267.1c-67.8 0-123.8-47.5-132.3-109h264.6c-8.6 61.5-64.5 109-132.3 109zm110-213.7c-29.5 0-53.5-23.9-53.5-53.5s23.9-53.5 53.5-53.5 53.5 23.9 53.5 53.5-23.9 53.5-53.5 53.5zM867.2 644.5V453.1h26.5c19.4 0 35.1 15.7 35.1 35.1v121.1c0 19.4-15.7 35.1-35.1 35.1h-26.5zM95.2 609.4V488.2c0-19.4 15.7-35.1 35.1-35.1h26.5v191.3h-26.5c-19.4 0-35.1-15.7-35.1-35.1zM561.5 149.6c0 23.4-15.6 43.3-36.9 49.7v44.9h-30v-44.9c-21.4-6.5-36.9-26.3-36.9-49.7 0-28.6 23.3-51.9 51.9-51.9s51.9 23.3 51.9 51.9z">
+                            </path>
+                        </svg>
+                        <h2 class="logo-text">Document Summarizer</h2>
                     </div>
-                    <button type="submit" id="send-message" class="material-symbols-rounded">arrow_upward</button>
                 </div>
-            </form>
+                <div class="header-right">
+                    <button type="button" class="theme-toggle-btn" id="themeToggleBtn" aria-label="Toggle theme" title="Toggle Theme">
+                        <span class="material-symbols-rounded theme-icon-sun">light_mode</span>
+                        <span class="material-symbols-rounded theme-icon-moon">dark_mode</span>
+                        <span class="theme-toggle-text">Dark</span>
+                    </button>
+                    <span class="tool-badge">DocSum</span>
+                </div>
+                <!-- Kept for script2.js compatibility -->
+                <button id="close-chatbot" class="material-symbols-rounded" style="display: none;">keyboard_arrow_down</button>
+            </div>
+
+            <!-- Chatbot Body -->
+            <div class="chat-body">
+                <div class="message bot-message">
+                    <svg class="bot-avatar" xmlns="http://www.w3.org/2000/svg" width="50" height="50"
+                        viewBox="0 0 1024 1024">
+                        <path
+                            d="M738.3 287.6H285.7c-59 0-106.8 47.8-106.8 106.8v303.1c0 59 47.8 106.8 106.8 106.8h81.5v111.1c0 .7.8 1.1 1.4.7l166.9-110.6 41.8-.8h117.4l43.6-.4c59 0 106.8-47.8 106.8-106.8V394.5c0-59-47.8-106.9-106.8-106.9zM351.7 448.2c0-29.5 23.9-53.5 53.5-53.5s53.5 23.9 53.5 53.5-23.9 53.5-53.5 53.5-53.5-23.9-53.5-53.5zm157.9 267.1c-67.8 0-123.8-47.5-132.3-109h264.6c-8.6 61.5-64.5 109-132.3 109zm110-213.7c-29.5 0-53.5-23.9-53.5-53.5s23.9-53.5 53.5-53.5 53.5 23.9 53.5 53.5-23.9 53.5-53.5 53.5zM867.2 644.5V453.1h26.5c19.4 0 35.1 15.7 35.1 35.1v121.1c0 19.4-15.7 35.1-35.1 35.1h-26.5zM95.2 609.4V488.2c0-19.4 15.7-35.1 35.1-35.1h26.5v191.3h-26.5c-19.4 0-35.1-15.7-35.1-35.1zM561.5 149.6c0 23.4-15.6 43.3-36.9 49.7v44.9h-30v-44.9c-21.4-6.5-36.9-26.3-36.9-49.7 0-28.6 23.3-51.9 51.9-51.9s51.9 23.3 51.9 51.9z">
+                        </path>
+                    </svg>
+                    <div class="message-text">Hey there 👋 <br />Upload any document (PDF, Word, or TXT) below and click the send button to generate a detailed AI summary.</div>
+                </div>
+            </div>
+
+            <!-- Chatbot Footer -->
+            <div class="chat-footer">
+                <!-- Visible Selected Document Attachment Badge -->
+                <div class="attached-file-badge hidden" id="attachedFileBadge">
+                    <div class="file-badge-info">
+                        <span class="material-symbols-rounded file-badge-icon">description</span>
+                        <div class="file-badge-details">
+                            <span class="file-name" id="attachedFileName">document.pdf</span>
+                            <span class="file-status" id="attachedFileStatus">Extracted & ready</span>
+                        </div>
+                    </div>
+                    <button type="button" class="file-remove-btn" id="file-cancel" title="Remove Document">
+                        <span class="material-symbols-rounded">close</span>
+                    </button>
+                </div>
+
+                <form action="#" class="chat-form">
+                    <textarea class="message-input" disabled>Summarize this document</textarea>
+                    <div class="chat-controls">
+                        <button type="button" id="emoji-picker" class="material-symbols-outlined" style="display: none;">sentiment_satisfied</button>
+                        <input type="file" accept=".pdf,.docx,.txt,.doc" id="file-input" hidden>
+                        <button type="button" id="file-upload" class="upload-btn" title="Attach Document (PDF, DOCX, TXT)">
+                            <span class="material-symbols-rounded">attach_file</span>
+                        </button>
+                        <button type="submit" id="send-message" class="material-symbols-rounded" title="Generate Summary">arrow_upward</button>
+                    </div>
+                </form>
+
+                <div class="cooldown-status-banner hidden" id="cooldownStatusBanner">
+                    <span class="cooldown-icon">⏳</span>
+                    <span class="cooldown-msg">You can submit another document in <strong class="cooldown-timer">20</strong> seconds.</span>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- Linking Emoji mart script for emoji picker -->
     <script src="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.js"></script>
-    <!-- Custom java script -->
     <!-- PDF.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-
     <!-- Mammoth.js for DOCX -->
     <script src="https://unpkg.com/mammoth/mammoth.browser.min.js"></script>
-    <script src="script2.js"></script>
+    <!-- Markdown Parser & Sanitizer -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.2/dist/purify.min.js"></script>
+    <!-- Custom JavaScript -->
+    <script src="theme.js"></script>
+    <script type="module" src="script2.js"></script>
 </body>
 
 </html>

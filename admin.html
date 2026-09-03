@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard | AI Chatbot</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,400,1,0" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      height: 100vh;
+      height: 100dvh;
+      background: radial-gradient(circle at 15% 20%, rgba(26, 18, 58, 0.98), rgba(10, 7, 24, 0.99));
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Top Navigation Bar ── */
+    .admin-navbar {
+      width: 100%;
+      height: 60px;
+      min-height: 60px;
+      background: rgba(18, 13, 40, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      z-index: 100;
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-logo {
+      width: 32px;
+      height: 32px;
+      background: #5350C4;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .brand-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+    }
+
+    .admin-badge {
+      font-size: 0.7rem;
+      font-weight: 600;
+      background: rgba(83, 80, 196, 0.3);
+      color: #a29bfe;
+      border: 1px solid rgba(162, 155, 254, 0.35);
+      padding: 2px 7px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      flex-shrink: 0;
+    }
+
+    .breadcrumbs {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.55);
+      margin-left: 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .breadcrumbs .crumb {
+      color: rgba(255, 255, 255, 0.85);
+      font-weight: 500;
+    }
+
+    .breadcrumbs .sep {
+      color: rgba(255, 255, 255, 0.3);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      text-decoration: none;
+      color: rgba(255, 255, 255, 0.85);
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+    }
+
+    .nav-btn.logout:hover {
+      background: rgba(255, 77, 77, 0.16);
+      color: #ff5e5e;
+      border-color: rgba(255, 77, 77, 0.3);
+    }
+
+    .nav-btn span.material-symbols-rounded {
+      font-size: 1.05rem;
+    }
+
+    /* ── Gate / Unauthorized Card (Centered) ── */
+    .gate-wrapper {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .gate-card {
+      background: rgba(22, 17, 48, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 16px;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      width: 100%;
+      max-width: 480px;
+      padding: 36px 30px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      text-align: center;
+    }
+
+    .status-icon-wrapper {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .status-icon-wrapper.checking {
+      background: rgba(123, 120, 216, 0.15);
+      color: #7B78D8;
+    }
+
+    .status-icon-wrapper.denied {
+      background: rgba(255, 77, 77, 0.15);
+      color: #ff5e5e;
+    }
+
+    .status-icon-wrapper span {
+      font-size: 2rem;
+    }
+
+    .gate-card h1 {
+      font-size: 1.35rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .gate-card p {
+      font-size: 0.92rem;
+      color: rgba(255, 255, 255, 0.7);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .gate-card .btn-row {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    /* ── 3-Column Dashboard Workspace ── */
+    .dashboard-workspace {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 320px 340px 1fr;
+      width: 100%;
+      height: calc(100vh - 60px);
+      height: calc(100dvh - 60px);
+      overflow: hidden;
+    }
+
+    /* ── Common Panel Styling ── */
+    .dash-panel {
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(16, 12, 36, 0.55);
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .dash-panel:last-child {
+      border-right: none;
+      background: rgba(12, 9, 28, 0.65);
+    }
+
+    .panel-header {
+      padding: 16px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(20, 15, 44, 0.6);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .panel-header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .panel-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #fff;
+    }
+
+    .badge-count {
+      font-size: 0.75rem;
+      padding: 2px 7px;
+      border-radius: 12px;
+      background: rgba(83, 80, 196, 0.25);
+      color: #a29bfe;
+      border: 1px solid rgba(162, 155, 254, 0.25);
+      font-weight: 600;
+    }
+
+    .panel-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .icon-action-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.75);
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .icon-action-btn:hover {
+      background: rgba(255, 255, 255, 0.14);
+      color: #fff;
+    }
+
+    .icon-action-btn span {
+      font-size: 1.1rem;
+    }
+
+    .icon-action-btn.rotating span {
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    .search-input-box {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+
+    .search-input-box span {
+      position: absolute;
+      left: 10px;
+      color: rgba(255, 255, 255, 0.35);
+      font-size: 1rem;
+      pointer-events: none;
+    }
+
+    .search-input-box input {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 7px 12px 7px 32px;
+      color: #fff;
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .search-input-box input:focus {
+      border-color: #7B78D8;
+    }
+
+    /* ── Scrollable List Containers ── */
+    .panel-scroll-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .panel-scroll-content::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    .panel-scroll-content::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 3px;
+    }
+
+    /* ── User Card / Row ── */
+    .user-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+      text-align: left;
+    }
+
+    .user-card:hover {
+      background: rgba(255, 255, 255, 0.07);
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .user-card.active {
+      background: rgba(83, 80, 196, 0.22) !important;
+      border-color: #7B78D8 !important;
+    }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(123, 120, 216, 0.2);
+      color: #a29bfe;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .user-avatar span {
+      font-size: 1.2rem;
+    }
+
+    .user-card-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .user-card-email {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #fff;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .user-card-meta {
+      font-size: 0.78rem;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .chat-pill {
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-weight: 600;
+      background: rgba(83, 80, 196, 0.2);
+      color: #a29bfe;
+      border: 1px solid rgba(162, 155, 254, 0.25);
+      flex-shrink: 0;
+    }
+
+    .chat-pill.zero {
+      background: rgba(255, 255, 255, 0.04);
+      color: rgba(255, 255, 255, 0.4);
+      border-color: rgba(255, 255, 255, 0.06);
+    }
+
+    /* ── Chat Card / Row ── */
+    .chat-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease;
+      text-align: left;
+    }
+
+    .chat-card:hover {
+      background: rgba(255, 255, 255, 0.07);
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .chat-card.active {
+      background: rgba(83, 80, 196, 0.22) !important;
+      border-color: #7B78D8 !important;
+    }
+
+    .chat-icon-wrapper {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      color: rgba(255, 255, 255, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .chat-icon-wrapper span {
+      font-size: 1.1rem;
+    }
+
+    .chat-card.active .chat-icon-wrapper {
+      background: rgba(123, 120, 216, 0.3);
+      color: #a29bfe;
+    }
+
+    .chat-card-body {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .chat-card-title {
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: #fff;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .chat-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 0.76rem;
+      color: rgba(255, 255, 255, 0.45);
+    }
+
+    /* ── Conversation Message Viewer ── */
+    .message-view-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(20, 15, 44, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+
+    .msg-header-info h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 3px;
+    }
+
+    .msg-header-meta {
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.5);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .messages-scroll-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .messages-scroll-area::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    .messages-scroll-area::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 3px;
+    }
+
+    .message-item {
+      display: flex;
+      flex-direction: column;
+      max-width: 80%;
+      animation: fadeIn 0.15s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message-item.user-msg {
+      align-self: flex-end;
+      align-items: flex-end;
+    }
+
+    .message-item.bot-msg {
+      align-self: flex-start;
+      align-items: flex-start;
+    }
+
+    .message-sender-tag {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.45);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .message-sender-tag span {
+      font-size: 0.95rem;
+    }
+
+    .message-item.user-msg .message-bubble {
+      background: #5350C4;
+      color: #fff;
+      border-radius: 14px 14px 2px 14px;
+      box-shadow: 0 4px 14px rgba(83, 80, 196, 0.25);
+    }
+
+    .message-item.bot-msg .message-bubble {
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #e5e5ea;
+      border-radius: 14px 14px 14px 2px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+    }
+
+    .message-bubble {
+      padding: 12px 16px;
+      font-size: 0.92rem;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    /* ── Empty & Placeholder States ── */
+    .empty-prompt {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.45);
+    }
+
+    .empty-prompt span.material-symbols-rounded {
+      font-size: 2.8rem;
+      margin-bottom: 12px;
+      opacity: 0.35;
+    }
+
+    .empty-prompt h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 4px;
+    }
+
+    .empty-prompt p {
+      font-size: 0.85rem;
+      max-width: 260px;
+      line-height: 1.5;
+    }
+
+    /* ── Back Buttons on Mobile ── */
+    .mobile-back-btn {
+      display: none;
+      align-items: center;
+      gap: 4px;
+      background: none;
+      border: none;
+      color: #a29bfe;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 4px 8px;
+      margin-bottom: 6px;
+    }
+
+    .mobile-back-btn span {
+      font-size: 1.1rem;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* ── Responsive Mobile / Tablet Behavior ── */
+    @media (max-width: 1024px) {
+      .dashboard-workspace {
+        grid-template-columns: 280px 280px 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .breadcrumbs {
+        display: none;
+      }
+
+      .mobile-back-btn {
+        display: inline-flex;
+      }
+
+      .dashboard-workspace {
+        display: flex;
+        position: relative;
+        width: 100%;
+        overflow: hidden;
+      }
+
+      .dash-panel {
+        width: 100%;
+        min-width: 100%;
+        border-right: none;
+      }
+
+      /* Mobile drill-down view switching */
+      .dashboard-workspace[data-view="users"] .panel-users {
+        display: flex;
+      }
+      .dashboard-workspace[data-view="users"] .panel-chats,
+      .dashboard-workspace[data-view="users"] .panel-messages {
+        display: none;
+      }
+
+      .dashboard-workspace[data-view="chats"] .panel-chats {
+        display: flex;
+      }
+      .dashboard-workspace[data-view="chats"] .panel-users,
+      .dashboard-workspace[data-view="chats"] .panel-messages {
+        display: none;
+      }
+
+      .dashboard-workspace[data-view="messages"] .panel-messages {
+        display: flex;
+      }
+      .dashboard-workspace[data-view="messages"] .panel-users,
+      .dashboard-workspace[data-view="messages"] .panel-chats {
+        display: none;
+      }
+
+      .message-item {
+        max-width: 90%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navbar (shown when authenticated) -->
+  <header class="admin-navbar hidden" id="adminNavbar">
+    <div class="brand-section">
+      <div class="brand-logo">
+        <span class="material-symbols-rounded">shield_person</span>
+      </div>
+      <div class="brand-title">AI Chatbot</div>
+      <span class="admin-badge">Admin</span>
+      <div class="breadcrumbs" id="adminBreadcrumbs">
+        <span class="crumb">Dashboard</span>
+      </div>
+    </div>
+    <div class="nav-actions">
+      <a href="/" class="nav-btn">
+        <span class="material-symbols-rounded">chat</span>
+        <span>Back to Chat</span>
+      </a>
+      <button type="button" class="nav-btn logout" id="adminLogoutBtn">
+        <span class="material-symbols-rounded">logout</span>
+        <span>Logout</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Authorization Gate Card (Unauthenticated or Forbidden) -->
+  <div class="gate-wrapper" id="gateWrapper">
+    <div class="gate-card" id="gateCard">
+      <div class="status-icon-wrapper checking" id="gateIcon">
+        <span class="material-symbols-rounded">sync</span>
+      </div>
+      <h1 id="gateTitle">Verifying Authorization...</h1>
+      <p id="gateMsg">Checking administrative credentials with the server.</p>
+      <div class="btn-row" id="gateActions">
+        <a href="/" class="nav-btn" style="padding: 10px 20px;">
+          <span class="material-symbols-rounded">arrow_back</span>
+          <span>Return to Home</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stage 3 Dashboard Workspace (3 Columns: Users | Chats | Messages) -->
+  <main class="dashboard-workspace hidden" id="dashboardWorkspace" data-view="users">
+
+    <!-- Column 1: Users List Panel -->
+    <section class="dash-panel panel-users">
+      <div class="panel-header">
+        <div class="panel-header-top">
+          <div class="panel-title">
+            <span>Users</span>
+            <span class="badge-count" id="userCountBadge">0</span>
+          </div>
+          <div class="panel-header-actions">
+            <button type="button" class="icon-action-btn" id="refreshUsersBtn" title="Refresh Users">
+              <span class="material-symbols-rounded">refresh</span>
+            </button>
+          </div>
+        </div>
+        <div class="search-input-box">
+          <span class="material-symbols-rounded">search</span>
+          <input type="text" id="userSearchInput" placeholder="Search by email..." autocomplete="off">
+        </div>
+      </div>
+
+      <div class="panel-scroll-content" id="usersListContainer">
+        <!-- User cards dynamically populated -->
+      </div>
+    </section>
+
+    <!-- Column 2: Selected User's Chats Panel -->
+    <section class="dash-panel panel-chats">
+      <div class="panel-header">
+        <button type="button" class="mobile-back-btn" id="backToUsersBtn">
+          <span class="material-symbols-rounded">arrow_back</span>
+          <span>Users</span>
+        </button>
+        <div class="panel-header-top">
+          <div class="panel-title">
+            <span id="chatsPanelTitle">Conversations</span>
+            <span class="badge-count" id="chatCountBadge">0</span>
+          </div>
+          <div class="panel-header-actions">
+            <button type="button" class="icon-action-btn" id="refreshChatsBtn" title="Refresh Chats" style="display: none;">
+              <span class="material-symbols-rounded">refresh</span>
+            </button>
+          </div>
+        </div>
+        <div class="search-input-box">
+          <span class="material-symbols-rounded">search</span>
+          <input type="text" id="chatSearchInput" placeholder="Filter conversations..." autocomplete="off">
+        </div>
+      </div>
+
+      <div class="panel-scroll-content" id="chatsListContainer">
+        <div class="empty-prompt" id="noUserSelectedPrompt">
+          <span class="material-symbols-rounded">person_search</span>
+          <h4>No User Selected</h4>
+          <p>Select a user on the left to view their conversations.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Column 3: Selected Chat Messages View -->
+    <section class="dash-panel panel-messages">
+      <div class="message-view-header" id="msgHeader">
+        <div class="msg-header-info">
+          <button type="button" class="mobile-back-btn" id="backToChatsBtn">
+            <span class="material-symbols-rounded">arrow_back</span>
+            <span>Conversations</span>
+          </button>
+          <h3 id="selectedChatTitle">Conversation Viewer</h3>
+          <div class="msg-header-meta" id="selectedChatMeta">
+            <span>Select a conversation to inspect</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="messages-scroll-area" id="messagesContainer">
+        <div class="empty-prompt" id="noChatSelectedPrompt">
+          <span class="material-symbols-rounded">forum</span>
+          <h4>No Conversation Selected</h4>
+          <p>Select a conversation to inspect the message history.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script type="module">
+    import { apiFetch } from "./js/api.js";
+    import { supabase } from "./lib/supabase.js";
+
+    // State Variables
+    let usersList = [];
+    let selectedUser = null;
+    let userChatsList = [];
+    let selectedChat = null;
+
+    // DOM Elements
+    const adminNavbar = document.getElementById("adminNavbar");
+    const gateWrapper = document.getElementById("gateWrapper");
+    const gateIcon = document.getElementById("gateIcon");
+    const gateTitle = document.getElementById("gateTitle");
+    const gateMsg = document.getElementById("gateMsg");
+    const gateActions = document.getElementById("gateActions");
+    const dashboardWorkspace = document.getElementById("dashboardWorkspace");
+    const adminBreadcrumbs = document.getElementById("adminBreadcrumbs");
+
+    const userCountBadge = document.getElementById("userCountBadge");
+    const userSearchInput = document.getElementById("userSearchInput");
+    const refreshUsersBtn = document.getElementById("refreshUsersBtn");
+    const usersListContainer = document.getElementById("usersListContainer");
+
+    const chatsPanelTitle = document.getElementById("chatsPanelTitle");
+    const chatCountBadge = document.getElementById("chatCountBadge");
+    const chatSearchInput = document.getElementById("chatSearchInput");
+    const refreshChatsBtn = document.getElementById("refreshChatsBtn");
+    const chatsListContainer = document.getElementById("chatsListContainer");
+    const noUserSelectedPrompt = document.getElementById("noUserSelectedPrompt");
+
+    const selectedChatTitle = document.getElementById("selectedChatTitle");
+    const selectedChatMeta = document.getElementById("selectedChatMeta");
+    const messagesContainer = document.getElementById("messagesContainer");
+    const noChatSelectedPrompt = document.getElementById("noChatSelectedPrompt");
+
+    const backToUsersBtn = document.getElementById("backToUsersBtn");
+    const backToChatsBtn = document.getElementById("backToChatsBtn");
+    const adminLogoutBtn = document.getElementById("adminLogoutBtn");
+
+    // XSS sanitization helper
+    function escapeHtml(str) {
+      if (!str) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    // Date formatting helper
+    function formatDate(isoStr, includeTime = false) {
+      if (!isoStr) return "N/A";
+      try {
+        const d = new Date(isoStr);
+        if (isNaN(d.getTime())) return "N/A";
+        const options = {
+          month: "short",
+          day: "numeric",
+          year: "numeric"
+        };
+        if (includeTime) {
+          options.hour = "numeric";
+          options.minute = "2-digit";
+        }
+        return d.toLocaleDateString("en-US", options);
+      } catch (_) {
+        return "N/A";
+      }
+    }
+
+    // Update Top Breadcrumb navigation
+    function updateBreadcrumbs() {
+      let html = `<span class="crumb">Dashboard</span>`;
+      if (selectedUser) {
+        html += ` <span class="sep">/</span> <span class="crumb">${escapeHtml(selectedUser.email)}</span>`;
+      }
+      if (selectedChat) {
+        html += ` <span class="sep">/</span> <span class="crumb">${escapeHtml(selectedChat.title || "Chat")}</span>`;
+      }
+      adminBreadcrumbs.innerHTML = html;
+    }
+
+    // ── 1. Load All Registered Users ──
+    async function loadUsers() {
+      try {
+        refreshUsersBtn.classList.add("rotating");
+
+        const res = await apiFetch("/api/admin/users");
+
+        if (res.status === 200) {
+          const data = await res.json();
+          usersList = Array.isArray(data.users) ? data.users : [];
+
+          // Reveal dashboard, hide gate
+          gateWrapper.classList.add("hidden");
+          adminNavbar.classList.remove("hidden");
+          dashboardWorkspace.classList.remove("hidden");
+
+          userCountBadge.textContent = usersList.length;
+          renderUsersList();
+          return;
+        }
+
+        if (res.status === 401) {
+          showGate("lock", "Authentication Required", "Please sign in with an administrator account to access this dashboard.", false);
+          return;
+        }
+
+        if (res.status === 403) {
+          showGate("gpp_bad", "Access Denied", "Your account does not have administrator privileges. Only authorized administrators may access this page.", true);
+          return;
+        }
+
+        throw new Error(`Server returned HTTP ${res.status}`);
+
+      } catch (err) {
+        console.error("Failed to load admin users:", err);
+        showGate("error", "Error Loading Dashboard", "Unable to retrieve dashboard data. Please verify your connection.", false);
+      } finally {
+        refreshUsersBtn.classList.remove("rotating");
+      }
+    }
+
+    // Render Users List
+    function renderUsersList() {
+      const q = userSearchInput.value.trim().toLowerCase();
+      const filtered = usersList.filter(u => 
+        (u.email && u.email.toLowerCase().includes(q)) ||
+        (u.id && u.id.toLowerCase().includes(q))
+      );
+
+      usersListContainer.innerHTML = "";
+
+      if (filtered.length === 0) {
+        usersListContainer.innerHTML = `
+          <div class="empty-prompt">
+            <span class="material-symbols-rounded">person_search</span>
+            <h4>No Users Found</h4>
+            <p>${q ? "No users matching your search." : "No registered users yet."}</p>
+          </div>
+        `;
+        return;
+      }
+
+      filtered.forEach(user => {
+        const card = document.createElement("div");
+        const isActive = selectedUser && selectedUser.id === user.id;
+        card.className = `user-card ${isActive ? 'active' : ''}`;
+        card.setAttribute("data-user-id", user.id);
+
+        const email = escapeHtml(user.email || "No email");
+        const joined = formatDate(user.createdAt);
+        const count = typeof user.chatCount === 'number' ? user.chatCount : 0;
+        const pillClass = count === 0 ? "chat-pill zero" : "chat-pill";
+
+        card.innerHTML = `
+          <div class="user-avatar">
+            <span class="material-symbols-rounded">person</span>
+          </div>
+          <div class="user-card-info">
+            <div class="user-card-email" title="${email}">${email}</div>
+            <div class="user-card-meta">Joined ${joined}</div>
+          </div>
+          <span class="${pillClass}">${count} ${count === 1 ? 'chat' : 'chats'}</span>
+        `;
+
+        card.addEventListener("click", () => selectUser(user));
+        usersListContainer.appendChild(card);
+      });
+    }
+
+    // ── 2. Select User & Load Their Chats ──
+    async function selectUser(user) {
+      selectedUser = user;
+      selectedChat = null;
+      chatSearchInput.value = "";
+
+      // Highlight active card
+      document.querySelectorAll(".user-card").forEach(c => {
+        if (c.getAttribute("data-user-id") === user.id) {
+          c.classList.add("active");
+        } else {
+          c.classList.remove("active");
+        }
+      });
+
+      // Update UI state
+      chatsPanelTitle.textContent = "Conversations";
+      refreshChatsBtn.style.display = "inline-flex";
+      dashboardWorkspace.setAttribute("data-view", "chats");
+      updateBreadcrumbs();
+
+      // Reset conversation messages panel
+      selectedChatTitle.textContent = "Conversation Viewer";
+      selectedChatMeta.innerHTML = `<span>Select a conversation to inspect</span>`;
+      messagesContainer.innerHTML = `
+        <div class="empty-prompt">
+          <span class="material-symbols-rounded">forum</span>
+          <h4>No Conversation Selected</h4>
+          <p>Select a conversation from the middle panel to view its messages.</p>
+        </div>
+      `;
+
+      await loadUserChats(user.id);
+    }
+
+    // Fetch user chats from GET /api/admin/user-chats?userId=...
+    async function loadUserChats(userId) {
+      try {
+        refreshChatsBtn.classList.add("rotating");
+        chatsListContainer.innerHTML = `
+          <div class="empty-prompt">
+            <span class="material-symbols-rounded" style="animation: spin 0.8s linear infinite;">sync</span>
+            <h4>Loading Conversations...</h4>
+            <p>Fetching user's chat history from Redis.</p>
+          </div>
+        `;
+
+        const res = await apiFetch(`/api/admin/user-chats?userId=${encodeURIComponent(userId)}`);
+
+        if (res.status === 200) {
+          const data = await res.json();
+          userChatsList = Array.isArray(data.chats) ? data.chats : [];
+          chatCountBadge.textContent = userChatsList.length;
+          renderChatsList();
+          return;
+        }
+
+        if (res.status === 404) {
+          chatsListContainer.innerHTML = `
+            <div class="empty-prompt">
+              <span class="material-symbols-rounded">error</span>
+              <h4>User Not Found</h4>
+              <p>The requested user was not found on the server.</p>
+            </div>
+          `;
+          return;
+        }
+
+        throw new Error(`Server returned HTTP ${res.status}`);
+
+      } catch (err) {
+        console.error("Error loading user chats:", err);
+        chatsListContainer.innerHTML = `
+          <div class="empty-prompt">
+            <span class="material-symbols-rounded">warning</span>
+            <h4>Error Loading Chats</h4>
+            <p>${escapeHtml(err.message || "Could not retrieve conversations.")}</p>
+          </div>
+        `;
+      } finally {
+        refreshChatsBtn.classList.remove("rotating");
+      }
+    }
+
+    // Render User's Chats List
+    function renderChatsList() {
+      const q = chatSearchInput.value.trim().toLowerCase();
+      const filtered = userChatsList.filter(c => 
+        (c.title && c.title.toLowerCase().includes(q)) ||
+        (c.id && c.id.toLowerCase().includes(q))
+      );
+
+      chatsListContainer.innerHTML = "";
+
+      if (filtered.length === 0) {
+        chatsListContainer.innerHTML = `
+          <div class="empty-prompt">
+            <span class="material-symbols-rounded">chat_bubble_outline</span>
+            <h4>${q ? "No Matches" : "No Conversations"}</h4>
+            <p>${q ? "No conversations match your filter." : "This user has not started any conversations yet."}</p>
+          </div>
+        `;
+        return;
+      }
+
+      filtered.forEach(chat => {
+        const card = document.createElement("div");
+        const isActive = selectedChat && selectedChat.id === chat.id;
+        card.className = `chat-card ${isActive ? 'active' : ''}`;
+        card.setAttribute("data-chat-id", chat.id);
+
+        const title = escapeHtml(chat.title || "New Chat");
+        const updated = formatDate(chat.updatedAt || chat.createdAt, true);
+        const msgCount = typeof chat.messageCount === 'number' ? chat.messageCount : 0;
+
+        card.innerHTML = `
+          <div class="chat-icon-wrapper">
+            <span class="material-symbols-rounded">chat_bubble</span>
+          </div>
+          <div class="chat-card-body">
+            <div class="chat-card-title" title="${title}">${title}</div>
+            <div class="chat-card-footer">
+              <span>${updated}</span>
+              <span class="badge-count">${msgCount} ${msgCount === 1 ? 'msg' : 'msgs'}</span>
+            </div>
+          </div>
+        `;
+
+        card.addEventListener("click", () => selectChat(chat));
+        chatsListContainer.appendChild(card);
+      });
+    }
+
+    // ── 3. Select Chat & Load Conversation Messages ──
+    async function selectChat(chat) {
+      if (!selectedUser) return;
+      selectedChat = chat;
+
+      // Highlight active chat card
+      document.querySelectorAll(".chat-card").forEach(c => {
+        if (c.getAttribute("data-chat-id") === chat.id) {
+          c.classList.add("active");
+        } else {
+          c.classList.remove("active");
+        }
+      });
+
+      // Update UI state
+      dashboardWorkspace.setAttribute("data-view", "messages");
+      updateBreadcrumbs();
+
+      selectedChatTitle.textContent = chat.title || "New Chat";
+      selectedChatMeta.innerHTML = `
+        <span>Updated ${formatDate(chat.updatedAt || chat.createdAt, true)}</span>
+        <span>•</span>
+        <span>${chat.messageCount || 0} messages</span>
+      `;
+
+      await loadChatMessages(selectedUser.id, chat.id);
+    }
+
+    // Fetch conversation messages from GET /api/admin/chat?userId=...&chatId=...
+    async function loadChatMessages(userId, chatId) {
+      try {
+        messagesContainer.innerHTML = `
+          <div class="empty-prompt">
+            <span class="material-symbols-rounded" style="animation: spin 0.8s linear infinite;">sync</span>
+            <h4>Loading Messages...</h4>
+            <p>Retrieving conversation from Redis.</p>
+          </div>
+        `;
+
+        const res = await apiFetch(`/api/admin/chat?userId=${encodeURIComponent(userId)}&chatId=${encodeURIComponent(chatId)}`);
+
+        if (res.status === 200) {
+          const data = await res.json();
+          const messages = data.chat && Array.isArray(data.chat.messages) ? data.chat.messages : [];
+          renderMessages(messages);
+          return;
+        }
+
+        if (res.status === 404) {
+          messagesContainer.innerHTML = `
+            <div class="empty-prompt">
+              <span class="material-symbols-rounded">error</span>
+              <h4>Chat Not Found</h4>
+              <p>The conversation does not exist or does not belong to this user.</p>
+            </div>
+          `;
+          return;
+        }
+
+        throw new Error(`Server returned HTTP ${res.status}`);
+
+      } catch (err) {
+        console.error("Error loading chat messages:", err);
+        messagesContainer.innerHTML = `
+          <div class="empty-prompt">
+            <span class="material-symbols-rounded">warning</span>
+            <h4>Error Loading Conversation</h4>
+            <p>${escapeHtml(err.message || "Failed to load messages.")}</p>
+          </div>
+        `;
+      }
+    }
+
+    // Render Conversation Messages
+    function renderMessages(messages) {
+      messagesContainer.innerHTML = "";
+
+      if (!messages || messages.length === 0) {
+        messagesContainer.innerHTML = `
+          <div class="empty-prompt">
+            <span class="material-symbols-rounded">forum</span>
+            <h4>Empty Conversation</h4>
+            <p>No messages have been recorded for this chat.</p>
+          </div>
+        `;
+        return;
+      }
+
+      messages.forEach(msg => {
+        const item = document.createElement("div");
+        const isUser = msg.role === "user";
+        item.className = `message-item ${isUser ? 'user-msg' : 'bot-msg'}`;
+
+        const senderIcon = isUser ? "person" : "smart_toy";
+        const senderLabel = isUser ? "User" : "Assistant";
+        const textContent = escapeHtml(msg.content || "");
+
+        item.innerHTML = `
+          <div class="message-sender-tag">
+            <span class="material-symbols-rounded">${senderIcon}</span>
+            <span>${senderLabel}</span>
+          </div>
+          <div class="message-bubble">${textContent}</div>
+        `;
+
+        messagesContainer.appendChild(item);
+      });
+
+      // Scroll smoothly to bottom
+      messagesContainer.scrollTo({
+        top: messagesContainer.scrollHeight,
+        behavior: "smooth"
+      });
+    }
+
+    // ── 4. Unauthorized Gate Handler ──
+    function showGate(icon, title, message, isForbidden) {
+      adminNavbar.classList.add("hidden");
+      dashboardWorkspace.classList.add("hidden");
+      gateWrapper.classList.remove("hidden");
+
+      gateIcon.className = "status-icon-wrapper denied";
+      gateIcon.innerHTML = `<span class="material-symbols-rounded">${icon}</span>`;
+      gateTitle.textContent = title;
+      gateMsg.textContent = message;
+
+      if (isForbidden) {
+        gateActions.innerHTML = `
+          <a href="/" class="nav-btn" style="padding: 10px 20px;">
+            <span class="material-symbols-rounded">arrow_back</span>
+            <span>Return to Home</span>
+          </a>
+        `;
+      } else {
+        gateActions.innerHTML = `
+          <a href="/" class="nav-btn" style="padding: 10px 20px;">
+            <span class="material-symbols-rounded">login</span>
+            <span>Sign In as Admin</span>
+          </a>
+        `;
+      }
+    }
+
+    // ── 5. Event Listeners ──
+
+    // User Search & Refresh
+    userSearchInput.addEventListener("input", renderUsersList);
+    refreshUsersBtn.addEventListener("click", () => {
+      userSearchInput.value = "";
+      loadUsers();
+    });
+
+    // Chat Search & Refresh
+    chatSearchInput.addEventListener("input", renderChatsList);
+    refreshChatsBtn.addEventListener("click", () => {
+      if (selectedUser) {
+        chatSearchInput.value = "";
+        loadUserChats(selectedUser.id);
+      }
+    });
+
+    // Mobile Navigation Back Buttons
+    backToUsersBtn.addEventListener("click", () => {
+      dashboardWorkspace.setAttribute("data-view", "users");
+    });
+
+    backToChatsBtn.addEventListener("click", () => {
+      dashboardWorkspace.setAttribute("data-view", "chats");
+    });
+
+    // Logout Button
+    adminLogoutBtn?.addEventListener("click", async () => {
+      try {
+        await supabase.auth.signOut();
+      } catch (e) {
+        console.error("Logout error:", e);
+      }
+      window.location.href = "/";
+    });
+
+    // Initial Load
+    loadUsers();
+  </script>
+</body>
+</html>

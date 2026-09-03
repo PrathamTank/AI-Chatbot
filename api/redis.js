@@ -84,6 +84,21 @@ const db = {
             return 1;
         }
         return 0;
+    },
+
+    async hlen(key) {
+        if (realRedis) {
+            try {
+                const len = await realRedis.hlen(key);
+                return typeof len === 'number' ? len : 0;
+            } catch (err) {
+                console.warn("Redis hlen failed, falling back to hgetall:", err.message);
+                const all = await realRedis.hgetall(key);
+                return all ? Object.keys(all).length : 0;
+            }
+        }
+        const bucket = memoryStore.get(key);
+        return bucket ? Object.keys(bucket).length : 0;
     }
 };
 
